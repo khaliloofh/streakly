@@ -1,0 +1,86 @@
+{% extends 'tracker/base.html' %}
+
+{% block extra_style %}
+    .cal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .cal-title { font-size: 1rem; font-weight: bold; }
+
+    .cal-grid {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+    }
+
+    .cal-weekdays, .cal-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+
+    .cal-weekdays {
+        margin-bottom: 8px;
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .cal-week { margin-bottom: 4px; }
+
+    .cal-day {
+        aspect-ratio: 1;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--off);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+    }
+
+    .cal-day.out { opacity: 0.3; }
+    .cal-day.today { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); color: var(--text); }
+
+    .cal-day.l1 { background: rgba(204, 120, 92, 0.25); }
+    .cal-day.l2 { background: rgba(204, 120, 92, 0.5); }
+    .cal-day.l3 { background: rgba(204, 120, 92, 0.75); }
+    .cal-day.l4 { background: var(--accent); color: #0d0d0d; font-weight: bold; }
+
+    .cal-day .pct { font-size: 0.6rem; margin-top: 2px; }
+{% endblock %}
+
+{% block content %}
+    <h2>Calendar</h2>
+
+    <div class="cal-header">
+        <a class="link" href="{% url 'calendar_month' prev_year prev_month %}">← əvvəlki</a>
+        <div class="cal-title">{{ month_name }}</div>
+        <a class="link" href="{% url 'calendar_month' next_year next_month %}">sonrakı →</a>
+    </div>
+
+    <div class="cal-grid">
+        <div class="cal-weekdays">
+            <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+        </div>
+        {% for week in weeks %}
+            <div class="cal-week">
+                {% for day in week %}
+                    <div class="cal-day {% if not day.in_month %}out{% endif %} {% if day.is_today %}today{% endif %} l{{ day.level }}" title="{{ day.date }}">
+                        <div>{{ day.date.day }}</div>
+                        {% if day.percent is not None %}
+                            <div class="pct">{{ day.percent }}%</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

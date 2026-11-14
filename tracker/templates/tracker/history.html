@@ -1,0 +1,53 @@
+{% extends 'tracker/base.html' %}
+
+{% block extra_style %}
+    .day-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 10px;
+    }
+
+    .day-header { display: flex; justify-content: space-between; align-items: center; }
+    .day-date { font-size: 0.95rem; font-weight: bold; }
+    .day-ratio { color: var(--accent); font-weight: bold; text-shadow: 0 0 8px var(--accent-glow); }
+
+    .day-items { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .item-pill {
+        font-size: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 3px 8px;
+        color: var(--text-dim);
+    }
+
+    .item-pill.done { color: var(--ok); border-color: var(--ok); }
+
+    .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 20px; }
+{% endblock %}
+
+{% block content %}
+    <h2>History</h2>
+
+    {% if history_data %}
+        {% for day in history_data %}
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-date">{{ day.date }}</div>
+                    <div class="day-ratio">{{ day.completed }} / {{ day.total }}</div>
+                </div>
+                <div class="day-items">
+                    {% for log in day.items %}
+                        <span class="item-pill {% if log.done %}done{% endif %}">
+                            {{ log.task.title }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty">Hələ keçmiş gün üçün data yoxdur.</div>
+    {% endif %}
+{% endblock %}

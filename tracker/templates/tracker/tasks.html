@@ -1,0 +1,117 @@
+{% extends 'tracker/base.html' %}
+
+{% block extra_style %}
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .filter-link {
+        color: var(--text-dim);
+        text-decoration: none;
+        font-size: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 14px;
+    }
+    .filter-link.active {
+        color: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 8px rgba(204, 120, 92, 0.2);
+    }
+
+    ul { list-style: none; padding: 0; }
+    li {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+    }
+    li:hover { border-color: var(--accent); }
+
+    .check { font-size: 1.05rem; width: 18px; text-align: center; margin-top: 2px; }
+    .check.done { color: var(--ok); text-shadow: 0 0 8px rgba(79, 209, 160, 0.6); }
+    .check.undone { color: var(--text-dim); }
+
+    .info { flex: 1; }
+    .title { font-size: 0.95rem; }
+    .badge {
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1px 5px;
+        margin-left: 6px;
+    }
+    .cat-badge {
+        font-size: 0.65rem;
+        color: var(--accent);
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        padding: 1px 5px;
+        margin-left: 6px;
+    }
+
+    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75rem; color: var(--text-dim); }
+    .meta .deadline.overdue { color: var(--danger); }
+
+    .streak {
+        color: var(--accent);
+        font-weight: bold;
+        text-shadow: 0 0 8px var(--accent-glow);
+        min-width: 28px;
+        text-align: center;
+        font-size: 0.95rem;
+        margin-top: 2px;
+    }
+
+    .actions { display: flex; gap: 10px; margin-top: 2px; }
+
+    .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 20px; }
+{% endblock %}
+
+{% block content %}
+    <h2>Tasks</h2>
+
+    <div class="filter-row">
+        <a class="filter-link {% if active_category == 'all' %}active{% endif %}" href="{% url 'tasks' %}">hamısı</a>
+        <a class="filter-link {% if active_category == 'must' %}active{% endif %}" href="{% url 'tasks' %}?category=must">must do</a>
+        <a class="filter-link {% if active_category == 'better' %}active{% endif %}" href="{% url 'tasks' %}?category=better">better do</a>
+    </div>
+
+    <ul>
+    {% for item in task_data %}
+        <li>
+            <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
+                {% if item.log.done %}✓{% else %}✗{% endif %}
+            </span>
+            <span class="info">
+                <div class="title">
+                    {{ item.task.title }}
+                    <span class="cat-badge">{{ item.task.get_category_display }}</span>
+                    {% if not item.task.is_recurring %}
+                        <span class="badge">bir dəfəlik</span>
+                    {% endif %}
+                </div>
+                {% if item.task.note or item.task.deadline %}
+                    <div class="meta">
+                        {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
+                        {% if item.task.deadline %}
+                            <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
+                                deadline: {{ item.task.deadline }}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </span>
+            <span class="streak">{{ item.streak }}</span>
+            <span class="actions">
+                <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
+                <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
+            </span>
+        </li>
+    {% empty %}
+        <div class="empty">Bu kateqoriyada task yoxdur.</div>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'tracker/base.html' %}
+
+{% block extra_style %}
+    .stats-grid { display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+
+    .stat-card {
+        flex: 1;
+        min-width: 140px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+        text-align: center;
+    }
+
+    .stat-card .label {
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+
+    .stat-card .value {
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 10px 14px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    th {
+        color: var(--text-dim);
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .streak-val { color: var(--accent); font-weight: bold; }
+
+    .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 20px; }
+{% endblock %}
+
+{% block content %}
+    <h2>Statistics</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">aktiv tasklar</div>
+            <div class="value">{{ total_tasks }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">tamamlanıb (hamısı)</div>
+            <div class="value">{{ total_completed_logs }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">tamamlanma faizi</div>
+            <div class="value">{{ completion_rate }}%</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">ən yüksək streak</div>
+            <div class="value">{{ best_streak }}</div>
+        </div>
+    </div>
+
+    <h2>Task üzrə streak-lər</h2>
+    {% if per_task %}
+        <table>
+            <tr>
+                <th>Task</th>
+                <th>Cari streak</th>
+                <th>Cəmi tamamlanma</th>
+            </tr>
+            {% for row in per_task %}
+                <tr>
+                    <td>{{ row.task.title }}</td>
+                    <td class="streak-val">{{ row.streak }}</td>
+                    <td>{{ row.completions }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="empty">Aktiv task yoxdur.</div>
+    {% endif %}
+{% endblock %}s

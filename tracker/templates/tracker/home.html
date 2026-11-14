@@ -1,0 +1,310 @@
+{% extends 'tracker/base.html' %}
+
+{% block extra_style %}
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .page-title { font-size: 1.1rem; font-weight: bold; }
+    .date { color: var(--text-dim); font-size: 0.85rem; }
+
+    .stats {
+        display: flex;
+        gap: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 24px;
+    }
+
+    .stat { flex: 1; text-align: center; }
+    .stat .label {
+        color: var(--text-dim);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+    .stat .value { font-size: 1.6rem; font-weight: bold; }
+    .stat .value.accent { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+
+    .heatmap-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 24px 20px 16px;
+        margin-bottom: 10px;
+    }
+
+    .heatmap-wrap { overflow-x: auto; padding-top: 16px; }
+    .heatmap { display: flex; gap: 3px; width: max-content; }
+    .week-col { display: flex; flex-direction: column; gap: 3px; position: relative; }
+    .month-label { position: absolute; top: -18px; font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
+    .hcell { width: 11px; height: 11px; border-radius: 2px; }
+    .hcell.l0 { background: var(--off); }
+    .hcell.l1 { background: rgba(204, 120, 92, 0.25); }
+    .hcell.l2 { background: rgba(204, 120, 92, 0.5); }
+    .hcell.l3 { background: rgba(204, 120, 92, 0.75); box-shadow: 0 0 4px rgba(204, 120, 92, 0.4); }
+    .hcell.l4 { background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
+
+    .legend { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-dim); margin-top: 12px; }
+    .legend .hcell { width: 10px; height: 10px; }
+
+    form.task-form {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 10px;
+    }
+
+    .field-group { margin-bottom: 14px; }
+    .field-group label {
+        display: block;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+    }
+
+    .form-row { display: flex; gap: 14px; }
+    .form-row .field-group { flex: 1; min-width: 0; }
+
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .checkbox-row input[type="checkbox"] { width: auto; }
+    .checkbox-row label { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0; }
+
+    @media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } }
+
+    input, select, textarea {
+        background: var(--bg-input);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 7px 10px;
+        font-family: inherit;
+        width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    ul { list-style: none; padding: 0; }
+
+    li {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        transition: border-color 0.15s;
+    }
+
+    li:hover { border-color: var(--accent); }
+
+    .check { font-size: 1.05rem; width: 18px; text-align: center; margin-top: 2px; }
+    .check.done { color: var(--ok); text-shadow: 0 0 8px rgba(79, 209, 160, 0.6); }
+    .check.undone { color: var(--text-dim); }
+
+    .info { flex: 1; }
+    .title { font-size: 0.95rem; }
+    .badge {
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 1px 5px;
+        margin-left: 6px;
+    }
+
+    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75rem; color: var(--text-dim); }
+    .meta .deadline.overdue { color: var(--danger); }
+
+    .streak {
+        color: var(--accent);
+        font-weight: bold;
+        text-shadow: 0 0 8px var(--accent-glow);
+        min-width: 28px;
+        text-align: center;
+        font-size: 0.95rem;
+        margin-top: 2px;
+    }
+
+    .week { display: flex; gap: 3px; margin-top: 4px; }
+    .week .cell { width: 11px; height: 11px; border-radius: 2px; background: var(--off); }
+    .week .cell.on { background: var(--ok); box-shadow: 0 0 6px rgba(79, 209, 160, 0.7); }
+
+    .actions { display: flex; gap: 10px; margin-top: 2px; }
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="page-title">Dashboard</div>
+        <div class="date">{{ today }}</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="label">tasks</div>
+            <div class="value">{{ total_tasks }}</div>
+        </div>
+        <div class="stat">
+            <div class="label">done today</div>
+            <div class="value accent">{{ done_today }}</div>
+        </div>
+        <div class="stat">
+            <div class="label">best streak</div>
+            <div class="value accent">{{ best_streak }}</div>
+        </div>
+    </div>
+
+    <h2>Activity</h2>
+    <div class="heatmap-card">
+        <div class="heatmap-wrap">
+            <div class="heatmap">
+            {% for week in heatmap %}
+                <div class="week-col">
+                    <div class="month-label">{{ week.label|default:"" }}</div>
+                    {% for cell in week.days %}
+                        <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}%{% else %}data yoxdur{% endif %}"></div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        <div class="legend">
+            az
+            <span class="hcell l0"></span>
+            <span class="hcell l1"></span>
+            <span class="hcell l2"></span>
+            <span class="hcell l3"></span>
+            <span class="hcell l4"></span>
+            çox
+        </div>
+    </div>
+
+    <form class="task-form" method="post">
+        {% csrf_token %}
+
+        <div class="field-group">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+
+        <div class="form-row">
+            <div class="field-group">
+                {{ form.category.label_tag }}
+                {{ form.category }}
+            </div>
+            <div class="field-group">
+                {{ form.deadline.label_tag }}
+                {{ form.deadline }}
+            </div>
+        </div>
+
+        <div class="field-group">
+            {{ form.note.label_tag }}
+            {{ form.note }}
+        </div>
+
+        <div class="checkbox-row">
+            {{ form.is_recurring }}
+            {{ form.is_recurring.label_tag }}
+        </div>
+
+        <button type="submit">+ task əlavə et</button>
+    </form>
+
+    <h2>Must do</h2>
+    <ul>
+    {% for item in task_data %}
+        {% if item.task.category == 'must' %}
+            <li>
+                <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
+                    {% if item.log.done %}✓{% else %}✗{% endif %}
+                </span>
+                <span class="info">
+                    <div class="title">
+                        {{ item.task.title }}
+                        {% if not item.task.is_recurring %}
+                            <span class="badge">bir dəfəlik</span>
+                        {% endif %}
+                    </div>
+                    {% if item.task.note or item.task.deadline %}
+                        <div class="meta">
+                            {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
+                            {% if item.task.deadline %}
+                                <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
+                                    deadline: {{ item.task.deadline }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </span>
+                <span class="streak">{{ item.streak }}</span>
+                <span class="week">
+                {% for day in item.week %}
+                    <span class="cell {% if day.done %}on{% endif %}"></span>
+                {% endfor %}
+                </span>
+                <span class="actions">
+                    <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
+                    <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
+                </span>
+            </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+
+    <h2>Better do</h2>
+    <ul>
+    {% for item in task_data %}
+        {% if item.task.category == 'better' %}
+            <li>
+                <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
+                    {% if item.log.done %}✓{% else %}✗{% endif %}
+                </span>
+                <span class="info">
+                    <div class="title">
+                        {{ item.task.title }}
+                        {% if not item.task.is_recurring %}
+                            <span class="badge">bir dəfəlik</span>
+                        {% endif %}
+                    </div>
+                    {% if item.task.note or item.task.deadline %}
+                        <div class="meta">
+                            {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
+                            {% if item.task.deadline %}
+                                <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
+                                    deadline: {{ item.task.deadline }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </span>
+                <span class="streak">{{ item.streak }}</span>
+                <span class="week">
+                {% for day in item.week %}
+                    <span class="cell {% if day.done %}on{% endif %}"></span>
+                {% endfor %}
+                </span>
+                <span class="actions">
+                    <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
+                    <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
+                </span>
+            </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% endblock %}
