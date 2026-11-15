@@ -15,6 +15,7 @@ class Task(models.Model):
     note = models.TextField(blank=True)
     deadline = models.DateField(null=True, blank=True)
     is_recurring = models.BooleanField(default=True, verbose_name='Hər gün təkrarlansın')
+    is_focus = models.BooleanField(default=False, verbose_name="Today's Focus")
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 

@@ -10,6 +10,9 @@ from .models import Task, TaskLog
 from .forms import TaskForm
 
 
+MILESTONES = [3, 7, 14, 30, 90]
+
+
 def build_heatmap(weeks=53):
     today = timezone.localdate()
     start = today - timedelta(weeks=weeks - 1)
@@ -71,6 +74,55 @@ def get_task_data(tasks):
     return data
 
 
+def overall_streak():
+    """Ümumi 'Day Streak': 'must do' kateqoriyalı bütün aktiv task-ların
+    o gün 100% done olduğu, bu gündən geriyə ardıcıl gün sayı.
+    Həmin gün heç bir 'must' task yoxdursa, streak dayanır."""
+    today = timezone.localdate()
+    streak = 0
+    day = today
+    while True:
+        must_tasks = Task.objects.filter(
+            category=Task.MUST,
+            is_active=True,
+            created_at__date__lte=day,
+        )
+        if not must_tasks.exists():
+            break
+        done_count = TaskLog.objects.filter(
+            task__in=must_tasks, date=day, done=True
+        ).count()
+        if done_count < must_tasks.count():
+            break
+        streak += 1
+        day -= timedelta(days=1)
+    return streak
+
+
+def current_week_summary():
+    """Cari həftə (Bazar ertəsi - Bazar) üçün hər gün neçə task bitib
+    / cəmi neçə task var idi."""
+    today = timezone.localdate()
+    monday = today - timedelta(days=today.weekday())
+    all_tasks = Task.objects.all()
+    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+    days = []
+    for i in range(7):
+        day = monday + timedelta(days=i)
+        tasks_that_day = all_tasks.filter(created_at__date__lte=day)
+        total = tasks_that_day.count()
+        done = TaskLog.objects.filter(task__in=tasks_that_day, date=day, done=True).count()
+        days.append({
+            'label': labels[i],
+            'date': day,
+            'done': done,
+            'total': total,
+            'is_today': day == today,
+        })
+    return days
+
+
 def home(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
@@ -90,6 +142,15 @@ def home(request):
     best_streak = max((item['streak'] for item in task_data), default=0)
     heatmap = build_heatmap(weeks=53)
 
+    current_streak = overall_streak()
+    milestones = [{'days': m, 'reached': current_streak >= m} for m in MILESTONES]
+    week_summary = current_week_summary()
+    week_done_sum = sum(d['done'] for d in week_summary)
+    week_total_sum = sum(d['total'] for d in week_summary)
+
+    focus_tasks = Task.objects.filter(is_active=True, is_focus=True)
+    focus_data = get_task_data(focus_tasks)
+
     context = {
         'task_data': task_data,
         'today': today,
@@ -97,6 +158,12 @@ def home(request):
         'total_tasks': total_tasks,
         'done_today': done_today,
         'best_streak': best_streak,
+        'current_streak': current_streak,
+        'milestones': milestones,
+        'week_summary': week_summary,
+        'week_done_sum': week_done_sum,
+        'week_total_sum': week_total_sum,
+        'focus_data': focus_data,
         'heatmap': heatmap,
         'active_page': 'dashboard',
     }
@@ -113,6 +180,13 @@ def toggle_done(request, log_id):
         log.task.save()
 
     log.save()
+    return redirect('home')
+
+
+def toggle_focus(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.is_focus = not task.is_focus
+    task.save()
     return redirect('home')
 
 

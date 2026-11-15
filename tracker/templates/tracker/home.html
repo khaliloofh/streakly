@@ -1,4 +1,5 @@
 {% extends 'tracker/base.html' %}
+{% load static %}
 
 {% block extra_style %}
     .page-header {
@@ -12,16 +13,19 @@
     .date { color: var(--text-dim); font-size: 0.85rem; }
 
     .stats {
-        display: flex;
-        gap: 14px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 18px 20px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
         margin-bottom: 24px;
     }
 
-    .stat { flex: 1; text-align: center; }
+    .stat {
+        text-align: left;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 18px;
+    }
     .stat .label {
         color: var(--text-dim);
         font-size: 0.75rem;
@@ -32,6 +36,23 @@
     .stat .value { font-size: 1.6rem; font-weight: bold; }
     .stat .value.accent { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
 
+    @media (max-width: 720px) {
+        .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .dashboard-row {
+        display: flex;
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 10px;
+    }
+    .dashboard-row > .heatmap-card { flex: 2; margin-bottom: 0; min-width: 0; }
+    .dashboard-row > .streak-card { flex: 1; margin-bottom: 0; min-width: 220px; }
+
+    @media (max-width: 720px) {
+        .dashboard-row { flex-direction: column; }
+    }
+
     .heatmap-card {
         background: var(--bg-card);
         border: 1px solid var(--border);
@@ -41,6 +62,11 @@
     }
 
     .heatmap-wrap { overflow-x: auto; padding-top: 16px; }
+    .heatmap-wrap { scrollbar-width: thin; scrollbar-color: var(--border) var(--bg-card); }
+    .heatmap-wrap::-webkit-scrollbar { height: 6px; }
+    .heatmap-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
+    .heatmap-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .heatmap-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
     .heatmap { display: flex; gap: 3px; width: max-content; }
     .week-col { display: flex; flex-direction: column; gap: 3px; position: relative; }
     .month-label { position: absolute; top: -18px; font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
@@ -53,6 +79,187 @@
 
     .legend { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-dim); margin-top: 12px; }
     .legend .hcell { width: 10px; height: 10px; }
+
+    .streak-card {
+        background:
+            linear-gradient(180deg, rgba(13,13,13,0.45), rgba(13,13,13,0.8) 70%, var(--bg-card)),
+            url("{% static 'tracker/img/streak-bg.png' %}") center / cover no-repeat,
+            var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .streak-ring {
+        --pct: 0;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: conic-gradient(var(--accent) min(calc(1% * var(--pct)), 100%), var(--off) 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 22px var(--accent-glow);
+    }
+    .streak-ring-inner {
+        width: 122px;
+        height: 122px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .streak-num {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent-glow);
+        line-height: 1;
+    }
+    .streak-label {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 4px;
+    }
+
+    .milestones {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .milestone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+    .milestone-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        font-size: 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .milestone.reached .milestone-dot {
+        border-color: var(--accent);
+        color: var(--accent);
+        box-shadow: 0 0 8px var(--accent-glow);
+    }
+    .milestone-label {
+        font-size: 0.65rem;
+        color: var(--text-dim);
+    }
+
+    .week-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 20px;
+        margin-bottom: 10px;
+    }
+    .week-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+    .week-card-header .title { font-size: 0.85rem; font-weight: bold; }
+    .week-card-header .total { font-size: 0.8rem; color: var(--text-dim); }
+
+    .week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+    .week-day {
+        text-align: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 4px;
+    }
+    .week-day.today { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+    .week-day .wd-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
+    .week-day .wd-value { font-size: 0.85rem; font-weight: bold; }
+    .week-day.today .wd-value { color: var(--accent); }
+
+    @media (max-width: 600px) {
+        .week-grid { grid-template-columns: repeat(4, 1fr); row-gap: 8px; }
+    }
+
+    .bottom-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .bottom-row > .week-card, .bottom-row > .focus-card { flex: 1; margin-bottom: 0; min-width: 0; }
+    @media (max-width: 720px) { .bottom-row { flex-direction: column; } }
+
+    .focus-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 20px;
+    }
+    .focus-card .title { font-size: 0.85rem; font-weight: bold; margin-bottom: 14px; display: block; }
+
+    .focus-item { margin-bottom: 14px; }
+    .focus-item:last-child { margin-bottom: 0; }
+    .focus-item-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+    .focus-item-top .check { font-size: 0.95rem; width: 16px; text-align: center; }
+    .focus-item-top .name { flex: 1; font-size: 0.85rem; }
+    .focus-item-top .frac { font-size: 0.75rem; color: var(--text-dim); }
+    .focus-bar {
+        height: 5px;
+        border-radius: 3px;
+        background: var(--off);
+        overflow: hidden;
+    }
+    .focus-bar-fill {
+        height: 100%;
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+    .focus-empty { color: var(--text-dim); font-size: 0.8rem; }
+
+    .quote-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 10px;
+    }
+    .quote-card img {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        filter: grayscale(1);
+        box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    .quote-card blockquote {
+        margin: 0;
+        font-style: italic;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
 
     form.task-form {
         background: var(--bg-card);
@@ -164,34 +371,62 @@
             <div class="value accent">{{ done_today }}</div>
         </div>
         <div class="stat">
+            <div class="label">current streak</div>
+            <div class="value accent">{{ current_streak }}</div>
+        </div>
+        <div class="stat">
             <div class="label">best streak</div>
-            <div class="value accent">{{ best_streak }}</div>
+            <div class="value">{{ best_streak }}</div>
         </div>
     </div>
 
     <h2>Activity</h2>
-    <div class="heatmap-card">
-        <div class="heatmap-wrap">
-            <div class="heatmap">
-            {% for week in heatmap %}
-                <div class="week-col">
-                    <div class="month-label">{{ week.label|default:"" }}</div>
-                    {% for cell in week.days %}
-                        <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}%{% else %}data yoxdur{% endif %}"></div>
-                    {% endfor %}
+    <div class="dashboard-row">
+        <div class="heatmap-card">
+            <div class="heatmap-wrap">
+                <div class="heatmap">
+                {% for week in heatmap %}
+                    <div class="week-col">
+                        <div class="month-label">{{ week.label|default:"" }}</div>
+                        {% for cell in week.days %}
+                            <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}%{% else %}data yoxdur{% endif %}"></div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
                 </div>
-            {% endfor %}
+            </div>
+            <div class="legend">
+                az
+                <span class="hcell l0"></span>
+                <span class="hcell l1"></span>
+                <span class="hcell l2"></span>
+                <span class="hcell l3"></span>
+                <span class="hcell l4"></span>
+                çox
             </div>
         </div>
-        <div class="legend">
-            az
-            <span class="hcell l0"></span>
-            <span class="hcell l1"></span>
-            <span class="hcell l2"></span>
-            <span class="hcell l3"></span>
-            <span class="hcell l4"></span>
-            çox
+
+        <div class="streak-card">
+            <div class="streak-ring" style="--pct: {% widthratio current_streak 90 100 %};">
+                <div class="streak-ring-inner">
+                    <div class="streak-num">{{ current_streak }}</div>
+                    <div class="streak-label">Day Streak</div>
+                </div>
+            </div>
+            <div class="milestones">
+                {% for m in milestones %}
+                    <div class="milestone {% if m.reached %}reached{% endif %}">
+                        <div class="milestone-dot">{{ m.days }}</div>
+                        <div class="milestone-label">gün</div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
+    </div>
+
+    <div class="quote-card">
+        <img src="{% static 'tracker/img/quote-bust.png' %}" alt="">
+        <blockquote>"It's not about motivation, it's about the system."</blockquote>
     </div>
 
     <form class="task-form" method="post">
@@ -225,6 +460,43 @@
 
         <button type="submit">+ task əlavə et</button>
     </form>
+
+    <div class="bottom-row">
+        <div class="focus-card">
+            <span class="title">Today's Focus</span>
+            {% for item in focus_data %}
+                <div class="focus-item">
+                    <div class="focus-item-top">
+                        <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
+                            <a class="link" style="border:none;padding:0;color:inherit;" href="{% url 'toggle_done' item.log.id %}">{% if item.log.done %}✓{% else %}✗{% endif %}</a>
+                        </span>
+                        <span class="name">{{ item.task.title }}</span>
+                        <span class="frac">{% if item.log.done %}1{% else %}0{% endif %}/1</span>
+                    </div>
+                    <div class="focus-bar">
+                        <div class="focus-bar-fill" style="width: {% if item.log.done %}100{% else %}0{% endif %}%;"></div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="focus-empty">Hələ heç bir task "focus" kimi işarələnməyib — aşağıdakı siyahılarda "focus" düyməsinə bas.</div>
+            {% endfor %}
+        </div>
+
+        <div class="week-card">
+            <div class="week-card-header">
+                <span class="title">This Week</span>
+                <span class="total">{{ week_done_sum }} / {{ week_total_sum }} tasks</span>
+            </div>
+            <div class="week-grid">
+                {% for d in week_summary %}
+                    <div class="week-day {% if d.is_today %}today{% endif %}">
+                        <div class="wd-label">{{ d.label }}</div>
+                        <div class="wd-value">{{ d.done }}/{{ d.total }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
     <h2>Must do</h2>
     <ul>
@@ -260,6 +532,7 @@
                 </span>
                 <span class="actions">
                     <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
+                    <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus{% endif %}</a>
                     <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
                 </span>
             </li>
@@ -301,6 +574,7 @@
                 </span>
                 <span class="actions">
                     <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
+                    <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus{% endif %}</a>
                     <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
                 </span>
             </li>
