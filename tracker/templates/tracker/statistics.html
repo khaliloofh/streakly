@@ -11,7 +11,9 @@
         border-radius: 10px;
         padding: 16px 18px;
         text-align: center;
+        transition: border-color 0.15s, transform 0.15s;
     }
+    .stat-card:hover { border-color: var(--accent); transform: translateY(-1px); }
 
     .stat-card .label {
         color: var(--text-dim);
@@ -39,7 +41,7 @@
 
     th, td {
         text-align: left;
-        padding: 10px 14px;
+        padding: 12px 16px;
         font-size: 0.85rem;
         border-bottom: 1px solid var(--border);
     }
@@ -49,17 +51,32 @@
         text-transform: uppercase;
         font-size: 0.7rem;
         letter-spacing: 1px;
+        background: rgba(255, 255, 255, 0.02);
     }
 
     tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.015); }
 
     .streak-val { color: var(--accent); font-weight: bold; }
+    .best-val { color: var(--ok); font-weight: bold; }
+
+    .badge-tag {
+        font-size: 0.65rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 2px 6px;
+        color: var(--text-dim);
+    }
+    .badge-tag.perm {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
 
     .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 20px; }
 {% endblock %}
 
 {% block content %}
-    <h2>Statistics</h2>
+    <h2>Statistika & Performans</h2>
 
     <div class="stats-grid">
         <div class="stat-card">
@@ -80,23 +97,53 @@
         </div>
     </div>
 
-    <h2>Task üzrə streak-lər</h2>
+    <h2>Ağıllı Məhsuldarlıq İnsight-ları</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">ən məhsuldar gün</div>
+            <div class="value" style="font-size: 1.15rem; color: var(--ok);">{{ insights.best_day }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">bu həftəki dinamika</div>
+            <div class="value" style="font-size: 1.15rem;">{% if insights.diff_pct >= 0 %}+{% endif %}{{ insights.diff_pct }}%</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">30 günlük intizam balı</div>
+            <div class="value" style="font-size: 1.15rem;">{{ insights.consistency_score }} / 100</div>
+        </div>
+    </div>
+
+    <h2>Task üzrə Streak Analizi</h2>
     {% if per_task %}
         <table>
-            <tr>
-                <th>Task</th>
-                <th>Cari streak</th>
-                <th>Cəmi tamamlanma</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Növ</th>
+                    <th>Cari streak</th>
+                    <th>Ən yaxşı streak</th>
+                    <th>Cəmi tamamlanma</th>
+                </tr>
+            </thead>
+            <tbody>
             {% for row in per_task %}
                 <tr>
-                    <td>{{ row.task.title }}</td>
-                    <td class="streak-val">{{ row.streak }}</td>
-                    <td>{{ row.completions }}</td>
+                    <td><strong>{{ row.task.title }}</strong></td>
+                    <td>
+                        {% if row.task.is_permanent %}
+                            <span class="badge-tag perm">Permanent</span>
+                        {% else %}
+                            <span class="badge-tag">Keçici</span>
+                        {% endif %}
+                    </td>
+                    <td class="streak-val">{{ row.streak }} gün</td>
+                    <td class="best-val">{{ row.best_streak }} gün</td>
+                    <td>{{ row.completions }} dəfə</td>
                 </tr>
             {% endfor %}
+            </tbody>
         </table>
     {% else %}
-        <div class="empty">Aktiv task yoxdur.</div>
+        <div class="empty">Hələ heç bir aktiv task yoxdur.</div>
     {% endif %}
-{% endblock %}s
+{% endblock %}

@@ -5,7 +5,7 @@ from .models import Task
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'category', 'note', 'deadline', 'is_recurring']
+        fields = ['title', 'note', 'deadline', 'is_permanent']
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'e.g. Read, Workout, Code...'
@@ -17,5 +17,5 @@ class TaskForm(forms.ModelForm):
             'deadline': forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
-            'is_recurring': 'Hər gün təkrarlansın',
+            'is_permanent': 'Permanent',
         }

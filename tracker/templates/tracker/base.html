@@ -1,22 +1,128 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="az">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Streakly{% block title_suffix %}{% endblock %}</title>
+
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Theme & Custom Wallpaper Initializer -->
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('streakly_theme') || 'ember';
+            var savedWallpaper = localStorage.getItem('streakly_wallpaper') !== 'off';
+            var customWall = localStorage.getItem('streakly_custom_wallpaper');
+
+            document.documentElement.setAttribute('data-theme', savedTheme);
+
+            if (!savedWallpaper) {
+                document.documentElement.classList.add('no-wallpaper');
+            }
+            if (customWall) {
+                document.documentElement.classList.add('has-custom-wallpaper');
+                document.documentElement.style.setProperty('--custom-page-bg', 'url("' + customWall + '")');
+            }
+        })();
+    </script>
     <style>
-        :root {
-            --bg: #0d0d0d;
-            --bg-sidebar: #111111;
-            --bg-card: #161616;
+        :root, [data-theme="ember"] {
+            --bg: #0e0e0e;
+            --bg-sidebar: #121212;
+            --bg-card: #171717;
             --bg-input: #1c1c1c;
-            --border: #2a2a2a;
-            --text: #e4e2dd;
-            --text-dim: #5c5c5c;
+            --border: #282828;
+            --border-hover: #383838;
+            --text: #eceae5;
+            --text-dim: #737373;
             --accent: #CC785C;
-            --accent-glow: rgba(204, 120, 92, 0.55);
+            --accent-glow: rgba(204, 120, 92, 0.45);
             --ok: #4fd1a0;
-            --off: #2a2a2a;
+            --off: #242424;
             --danger: #e2574c;
+            --ring-track: #222222;
+            --bg-page-img: url("{% static 'tracker/img/page-bg.png' %}");
+            --bg-sidebar-img: url("{% static 'tracker/img/sidebar-bg.png' %}");
+        }
+
+        [data-theme="cyber"] {
+            --bg: #07090e;
+            --bg-sidebar: #0b0f17;
+            --bg-card: #101622;
+            --bg-input: #151d2c;
+            --border: #1d283c;
+            --border-hover: #293854;
+            --text: #e2e8f0;
+            --text-dim: #64748b;
+            --accent: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.45);
+            --ok: #38ef7d;
+            --off: #172030;
+            --danger: #ff4b72;
+            --ring-track: #172030;
+            --bg-page-img: url("{% static 'tracker/img/page-bg-cyber.svg' %}");
+            --bg-sidebar-img: url("{% static 'tracker/img/page-bg-cyber.svg' %}");
+        }
+
+        [data-theme="emerald"] {
+            --bg: #060b08;
+            --bg-sidebar: #09120d;
+            --bg-card: #0e1b14;
+            --bg-input: #13241b;
+            --border: #1c3527;
+            --border-hover: #284b38;
+            --text: #e3ede6;
+            --text-dim: #657e70;
+            --accent: #10b981;
+            --accent-glow: rgba(16, 185, 129, 0.45);
+            --ok: #34d399;
+            --off: #16281e;
+            --danger: #ef4444;
+            --ring-track: #16281e;
+            --bg-page-img: url("{% static 'tracker/img/page-bg-emerald.svg' %}");
+            --bg-sidebar-img: url("{% static 'tracker/img/page-bg-emerald.svg' %}");
+        }
+
+        [data-theme="amethyst"] {
+            --bg: #0b0910;
+            --bg-sidebar: #100d17;
+            --bg-card: #171321;
+            --bg-input: #1e192c;
+            --border: #2b233c;
+            --border-hover: #3c3154;
+            --text: #eee9f7;
+            --text-dim: #786f91;
+            --accent: #c084fc;
+            --accent-glow: rgba(192, 132, 252, 0.45);
+            --ok: #4ade80;
+            --off: #241e33;
+            --danger: #f43f5e;
+            --ring-track: #241e33;
+            --bg-page-img: url("{% static 'tracker/img/page-bg-amethyst.svg' %}");
+            --bg-sidebar-img: url("{% static 'tracker/img/page-bg-amethyst.svg' %}");
+        }
+
+        [data-theme="monochrome"] {
+            --bg: #080808;
+            --bg-sidebar: #0f0f0f;
+            --bg-card: #151515;
+            --bg-input: #1d1d1d;
+            --border: #282828;
+            --border-hover: #383838;
+            --text: #f0f0f0;
+            --text-dim: #808080;
+            --accent: #e5e5e5;
+            --accent-glow: rgba(229, 229, 229, 0.35);
+            --ok: #52c41a;
+            --off: #222222;
+            --danger: #ff4d4f;
+            --ring-track: #222222;
+            --bg-page-img: url("{% static 'tracker/img/page-bg-monochrome.svg' %}");
+            --bg-sidebar-img: url("{% static 'tracker/img/page-bg-monochrome.svg' %}");
         }
 
         * { box-sizing: border-box; }
@@ -24,13 +130,31 @@
         html, body {
             margin: 0;
             padding: 0;
-            height: 100%;
+            min-height: 100%;
             background:
-                linear-gradient(180deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.3) 50%, rgba(13,13,13,0.6) 100%),
-                url("{% static 'tracker/img/page-bg.png' %}") center right / cover no-repeat fixed,
+                linear-gradient(180deg, rgba(13,13,13,0.6) 0%, rgba(13,13,13,0.35) 50%, rgba(13,13,13,0.65) 100%),
+                var(--bg-page-img) center right / cover no-repeat fixed,
                 var(--bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Custom Wallpaper Override for Page */
+        html.has-custom-wallpaper body {
+            background:
+                linear-gradient(180deg, rgba(13,13,13,0.72) 0%, rgba(13,13,13,0.45) 50%, rgba(13,13,13,0.8) 100%),
+                var(--custom-page-bg) center / cover no-repeat fixed,
+                var(--bg) !important;
+        }
+
+        .no-wallpaper, html.no-wallpaper body {
+            background-image: none !important;
+            background-color: var(--bg) !important;
         }
 
         .layout {
@@ -38,38 +162,44 @@
             min-height: 100vh;
         }
 
+        /* Sidebar strictly preserves theme color and theme background */
         .sidebar {
             width: 210px;
             flex-shrink: 0;
             background:
-                linear-gradient(180deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.85) 55%, var(--bg-sidebar) 92%),
-                radial-gradient(circle at 30% 0%, rgba(204, 120, 92, 0.15), transparent 60%),
-                url("{% static 'tracker/img/sidebar-bg.png' %}") center / cover no-repeat,
+                linear-gradient(180deg, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.88) 55%, var(--bg-sidebar) 92%),
+                radial-gradient(circle at 30% 0%, var(--accent-glow), transparent 60%),
+                var(--bg-sidebar-img) center / cover no-repeat,
                 var(--bg-sidebar);
             border-right: 1px solid var(--border);
             padding: 24px 14px;
             display: flex;
             flex-direction: column;
+            transition: border-color 0.25s, background-color 0.25s;
+        }
+
+        .no-wallpaper .sidebar, html.no-wallpaper .sidebar {
+            background-image: none !important;
+            background-color: var(--bg-sidebar) !important;
         }
 
         .sidebar .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--accent);
-            text-shadow: 0 0 12px var(--accent-glow);
-            letter-spacing: 0.5px;
+            gap: 10px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.3px;
             margin-bottom: 28px;
             padding-left: 6px;
         }
 
         .sidebar .logo .mark {
-            width: 18px;
-            height: 18px;
-            border-radius: 50% 50% 50% 4px;
-            background: linear-gradient(135deg, var(--accent), #e8a386);
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            background: var(--accent);
             box-shadow: 0 0 10px var(--accent-glow);
             flex-shrink: 0;
         }
@@ -81,41 +211,68 @@
             color: var(--text-dim);
             text-decoration: none;
             font-size: 0.85rem;
-            padding: 9px 12px;
+            font-weight: 500;
+            padding: 8px 12px;
             border-radius: 6px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
             border: 1px solid transparent;
-            transition: color 0.15s, border-color 0.15s, background 0.15s;
+            transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
         }
 
         .nav-link .icon {
             width: 16px;
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             flex-shrink: 0;
+            opacity: 0.7;
         }
 
         .nav-link:hover {
             color: var(--text);
             border-color: var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            transform: translateX(2px);
         }
 
         .nav-link.active {
-            color: var(--accent);
-            font-weight: bold;
-            background: rgba(204, 120, 92, 0.1);
-            border-color: var(--accent);
-            box-shadow: 0 0 10px rgba(204, 120, 92, 0.2);
+            color: var(--text);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--border-hover);
+            box-shadow: inset 2px 0 0 var(--accent);
         }
+        .nav-link.active .icon { opacity: 1; color: var(--accent); }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-footer a {
+            color: var(--text-dim);
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .sidebar-footer a:hover { color: var(--accent); border-color: var(--accent); }
 
         .main {
             flex: 1;
             padding: 32px 36px;
-            max-width: 900px;
+            max-width: 920px;
             margin: 0 auto;
             width: 100%;
-            background: rgba(13, 13, 13, 0.55);
-            backdrop-filter: blur(2px);
+            background: rgba(13, 13, 13, 0.68);
+            backdrop-filter: blur(4px);
         }
 
         @media (max-width: 720px) {
@@ -124,46 +281,55 @@
                 width: 100%;
                 flex-direction: row;
                 overflow-x: auto;
-                padding: 12px;
+                padding: 10px;
                 gap: 6px;
             }
             .sidebar .logo { display: none; }
-            .nav-link { margin-bottom: 0; white-space: nowrap; }
-            .main { padding: 20px; max-width: 100%; margin: 0; }
+            .sidebar-footer { display: none; }
+            .nav-link { margin-bottom: 0; white-space: nowrap; font-size: 0.8rem; padding: 7px 10px; }
+            .main { padding: 18px; max-width: 100%; margin: 0; }
         }
 
         h2 {
             color: var(--text-dim);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-top: 30px;
-            margin-bottom: 10px;
+            letter-spacing: 1.2px;
+            margin-top: 28px;
+            margin-bottom: 12px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 18px 20px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            transition: border-color 0.15s;
         }
 
         a.link {
             color: var(--text-dim);
             text-decoration: none;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
+            font-weight: 500;
             border: 1px solid var(--border);
             border-radius: 4px;
             padding: 3px 8px;
-            transition: color 0.15s, border-color 0.15s;
+            transition: color 0.15s, border-color 0.15s, transform 0.15s;
+            display: inline-block;
         }
 
         a.link:hover {
-            color: var(--accent);
-            border-color: var(--accent);
+            color: var(--text);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
         }
 
         button, .btn {
@@ -171,24 +337,77 @@
             color: #0d0d0d;
             border: none;
             border-radius: 6px;
-            padding: 9px 18px;
+            padding: 8px 16px;
             font-family: inherit;
-            font-weight: bold;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
             box-shadow: 0 0 10px var(--accent-glow);
-            transition: box-shadow 0.15s, transform 0.15s;
+            transition: box-shadow 0.15s, transform 0.15s, filter 0.15s;
             text-decoration: none;
             display: inline-block;
         }
 
         button:hover, .btn:hover {
-            box-shadow: 0 0 18px var(--accent-glow);
+            box-shadow: 0 0 16px var(--accent-glow);
             transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        button:active, .btn:active {
+            transform: translateY(1px);
         }
 
         button.danger {
             background: var(--danger);
+            color: #fff;
             box-shadow: 0 0 10px rgba(226, 87, 76, 0.4);
+        }
+
+        /* Checkmark Interactive & Animation (Clean Unicode, Zero Emojis) */
+        .check-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0;
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: transform 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .check-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .check-btn.done {
+            background: var(--ok);
+            border-color: var(--ok);
+            color: #0d0d0d;
+            font-weight: 700;
+        }
+        .check-btn.frozen {
+            background: transparent;
+            border-color: var(--accent);
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        .check-btn.pop {
+            animation: popCheck 0.3s ease-out;
+        }
+
+        @keyframes popCheck {
+            0% { transform: scale(0.7); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1); }
         }
 
         .toast-wrap {
@@ -216,10 +435,68 @@
 
         .toast.fade-out { opacity: 0; }
 
+        /* Shortcuts Modal (Clean, No Emojis) */
+        .modal-backdrop {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        .modal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .modal-header h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text); }
+        .close-modal-btn {
+            background: none; border: none; color: var(--text-dim); font-size: 1.1rem; cursor: pointer; padding: 4px; box-shadow: none;
+        }
+        .close-modal-btn:hover { color: var(--text); box-shadow: none; transform: none; }
+        .shortcut-list { display: flex; flex-direction: column; gap: 10px; }
+        .shortcut-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+        kbd {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-family: 'Inter', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            box-shadow: 0 1px 0 var(--border);
+        }
+
+        /* Confetti canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
         {% block extra_style %}{% endblock %}
     </style>
 </head>
 <body>
+    <canvas id="confetti-canvas"></canvas>
+
     <div class="layout">
         <div class="sidebar">
             <div class="logo"><span class="mark"></span> Streakly</div>
@@ -229,9 +506,31 @@
             <a class="nav-link {% if active_page == 'statistics' %}active{% endif %}" href="{% url 'statistics' %}"><span class="icon">▤</span> Statistics</a>
             <a class="nav-link {% if active_page == 'history' %}active{% endif %}" href="{% url 'history' %}"><span class="icon">↺</span> History</a>
             <a class="nav-link {% if active_page == 'settings' %}active{% endif %}" href="{% url 'settings' %}"><span class="icon">⚙</span> Settings</a>
+
+            <div class="sidebar-footer">
+                <span id="theme-indicator" title="Cari tema">Ember</span>
+                <a onclick="toggleShortcutsModal()" title="Klaviatura qısayolları">[Qısayollar]</a>
+            </div>
         </div>
         <div class="main">
             {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Shortcuts Modal -->
+    <div id="shortcuts-modal" class="modal-backdrop" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Klaviatura Qısayolları</h3>
+                <button type="button" class="close-modal-btn" onclick="toggleShortcutsModal()">✕</button>
+            </div>
+            <div class="shortcut-list">
+                <div class="shortcut-item"><span>Yeni task formuna fokuslan</span> <kbd>n</kbd></div>
+                <div class="shortcut-item"><span>1-9-cu taskı tamamla</span> <kbd>1</kbd> .. <kbd>9</kbd></div>
+                <div class="shortcut-item"><span>Temanı növbətiyə çevir</span> <kbd>t</kbd></div>
+                <div class="shortcut-item"><span>Qısayollar pəncərəsini aç/bağla</span> <kbd>?</kbd></div>
+                <div class="shortcut-item"><span>Bağla / Seçimdən çıx</span> <kbd>Esc</kbd></div>
+            </div>
         </div>
     </div>
 
@@ -252,5 +551,248 @@
         }, 3000);
     </script>
     {% endif %}
+
+    <!-- Confetti, Web Audio & Shortcuts Handler -->
+    <script>
+        // Mini Confetti Engine
+        (function() {
+            var canvas = document.getElementById('confetti-canvas');
+            var ctx = canvas.getContext('2d');
+            var pieces = [];
+            var numberOfPieces = 30;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            function Piece(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * (canvas.height * 0.4);
+                this.size = (Math.random() * 6) + 4;
+                this.gravity = (Math.random() * 0.8) + 1.2;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() * 8) - 4;
+                var colors = ['#CC785C', '#4fd1a0', '#00f2fe', '#c084fc', '#ffd166', '#ffffff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.opacity = 1;
+                this.vx = (Math.random() * 8) - 4;
+                this.vy = (Math.random() * -6) - 4;
+            }
+
+            Piece.prototype.update = function() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.2;
+                this.rotation += this.rotationSpeed;
+                this.opacity -= 0.012;
+            };
+
+            Piece.prototype.draw = function() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.fillStyle = this.color;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation * Math.PI / 180);
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            };
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (var i = pieces.length - 1; i >= 0; i--) {
+                    pieces[i].update();
+                    pieces[i].draw();
+                    if (pieces[i].opacity <= 0 || pieces[i].y > canvas.height) {
+                        pieces.splice(i, 1);
+                    }
+                }
+                if (pieces.length > 0) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            window.streaklyConfetti = function(originX, originY) {
+                var startX = originX || (window.innerWidth / 2);
+                var startY = originY || (window.innerHeight / 3);
+                for (var i = 0; i < numberOfPieces; i++) {
+                    pieces.push(new Piece(startX, startY));
+                }
+                requestAnimationFrame(animate);
+            };
+        })();
+
+        // Web Audio Chime Sound (Zero external audio file needed)
+        window.playStreaklyChime = function() {
+            if (localStorage.getItem('streakly_sound') === 'off') return;
+            try {
+                var AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                var ctx = new AudioCtx();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                var now = ctx.currentTime;
+                osc.frequency.setValueAtTime(587.33, now); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.12); // A5
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.27);
+            } catch (e) {}
+        };
+
+        // Theme cycle helper
+        var THEMES = ['ember', 'cyber', 'emerald', 'amethyst', 'monochrome'];
+        var THEME_LABELS = {
+            'ember': 'Ember',
+            'cyber': 'Cyber',
+            'emerald': 'Emerald',
+            'amethyst': 'Amethyst',
+            'monochrome': 'Mono'
+        };
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('streakly_theme', theme);
+            var ind = document.getElementById('theme-indicator');
+            if (ind && THEME_LABELS[theme]) ind.textContent = THEME_LABELS[theme];
+        }
+
+        function cycleTheme() {
+            var cur = localStorage.getItem('streakly_theme') || 'ember';
+            var idx = THEMES.indexOf(cur);
+            var nextTheme = THEMES[(idx + 1) % THEMES.length];
+            applyTheme(nextTheme);
+        }
+
+        // Shortcuts modal toggle
+        function toggleShortcutsModal() {
+            var m = document.getElementById('shortcuts-modal');
+            if (!m) return;
+            m.style.display = (m.style.display === 'none' || !m.style.display) ? 'flex' : 'none';
+        }
+
+        // Keyboard Shortcuts Listener
+        document.addEventListener('keydown', function(e) {
+            var tag = (e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+                if (e.key === 'Escape') e.target.blur();
+                return;
+            }
+            if (e.key === 'n' || e.key === 'N') {
+                e.preventDefault();
+                var titleInput = document.querySelector('input[name="title"]');
+                if (titleInput) {
+                    titleInput.focus();
+                    titleInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else if (e.key >= '1' && e.key <= '9') {
+                var idx = parseInt(e.key, 10) - 1;
+                var taskButtons = document.querySelectorAll('ul li .task-toggle-btn');
+                if (taskButtons && taskButtons[idx]) {
+                    e.preventDefault();
+                    taskButtons[idx].click();
+                }
+            } else if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                cycleTheme();
+            } else if (e.key === '?') {
+                e.preventDefault();
+                toggleShortcutsModal();
+            } else if (e.key === 'Escape') {
+                var m = document.getElementById('shortcuts-modal');
+                if (m) m.style.display = 'none';
+            }
+        });
+
+        // Initialize Theme Indicator
+        (function() {
+            var cur = localStorage.getItem('streakly_theme') || 'ember';
+            var ind = document.getElementById('theme-indicator');
+            if (ind && THEME_LABELS[cur]) ind.textContent = THEME_LABELS[cur];
+        })();
+
+        // Snappy AJAX Checkmark Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.task-toggle-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var url = btn.getAttribute('href');
+                    var rect = btn.getBoundingClientRect();
+                    var clickX = rect.left + rect.width / 2;
+                    var clickY = rect.top + rect.height / 2;
+
+                    fetch(url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('HTTP ' + res.status);
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        if (data.success) {
+                            btn.classList.add('pop');
+                            setTimeout(function() { btn.classList.remove('pop'); }, 300);
+
+                            if (data.done) {
+                                btn.classList.remove('undone', 'frozen');
+                                btn.classList.add('done');
+                                btn.innerHTML = '✓';
+                                window.streaklyConfetti(clickX, clickY);
+                                window.playStreaklyChime();
+                            } else if (data.frozen) {
+                                btn.classList.remove('undone', 'done');
+                                btn.classList.add('frozen');
+                                btn.innerHTML = 'D';
+                            } else {
+                                btn.classList.remove('done', 'frozen');
+                                btn.classList.add('undone');
+                                btn.innerHTML = '—';
+                            }
+
+                            // Update item streak if element exists
+                            var itemLi = btn.closest('li') || btn.closest('.focus-item');
+                            if (itemLi) {
+                                var streakEl = itemLi.querySelector('.streak');
+                                if (streakEl && data.streak !== undefined) {
+                                    streakEl.textContent = data.streak;
+                                }
+                                var fracEl = itemLi.querySelector('.frac');
+                                if (fracEl) {
+                                    fracEl.textContent = (data.done ? '1' : '0') + '/1';
+                                }
+                                var barFill = itemLi.querySelector('.focus-bar-fill');
+                                if (barFill) {
+                                    barFill.style.width = (data.done ? '100%' : '0%');
+                                }
+                            }
+
+                            // Update "done today" counter if on dashboard
+                            var doneTodayEl = document.getElementById('stat-done-today');
+                            if (doneTodayEl) {
+                                var current = parseInt(doneTodayEl.textContent, 10) || 0;
+                                doneTodayEl.textContent = data.done ? (current + 1) : Math.max(0, current - 1);
+                            }
+
+                            // Update overall streak display if returned
+                            var streakNumEl = document.querySelector('.streak-num');
+                            if (streakNumEl && data.overall_streak !== undefined) {
+                                streakNumEl.textContent = data.overall_streak;
+                            }
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('AJAX toggle failed, falling back to page reload', err);
+                        window.location.href = url;
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>

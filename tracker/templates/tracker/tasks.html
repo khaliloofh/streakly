@@ -1,7 +1,7 @@
 {% extends 'tracker/base.html' %}
 
 {% block extra_style %}
-    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .filter-row { display: flex; gap: 8px; margin-bottom: 20px; }
     .filter-link {
         color: var(--text-dim);
         text-decoration: none;
@@ -9,14 +9,17 @@
         border: 1px solid var(--border);
         border-radius: 6px;
         padding: 6px 14px;
+        transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
+    .filter-link:hover { color: var(--text); border-color: var(--text-dim); }
     .filter-link.active {
         color: var(--accent);
         border-color: var(--accent);
-        box-shadow: 0 0 8px rgba(204, 120, 92, 0.2);
+        box-shadow: 0 0 8px var(--accent-glow);
+        font-weight: 600;
     }
 
-    ul { list-style: none; padding: 0; }
+    ul { list-style: none; padding: 0; margin: 0; }
     li {
         display: flex;
         align-items: flex-start;
@@ -26,15 +29,14 @@
         border-radius: 8px;
         padding: 12px 16px;
         margin-bottom: 8px;
+        transition: border-color 0.15s;
     }
     li:hover { border-color: var(--accent); }
+    li.permanent { border-left: 3px solid var(--accent); }
+    li.temporary { border-left: 3px solid var(--border); }
 
-    .check { font-size: 1.05rem; width: 18px; text-align: center; margin-top: 2px; }
-    .check.done { color: var(--ok); text-shadow: 0 0 8px rgba(79, 209, 160, 0.6); }
-    .check.undone { color: var(--text-dim); }
-
-    .info { flex: 1; }
-    .title { font-size: 0.95rem; }
+    .info { flex: 1; min-width: 0; }
+    .title { font-size: 0.95rem; font-weight: 500; }
     .badge {
         font-size: 0.65rem;
         color: var(--text-dim);
@@ -43,17 +45,12 @@
         padding: 1px 5px;
         margin-left: 6px;
     }
-    .cat-badge {
-        font-size: 0.65rem;
+    .badge.perm {
+        border-color: var(--accent);
         color: var(--accent);
-        border: 1px solid var(--accent);
-        border-radius: 4px;
-        padding: 1px 5px;
-        margin-left: 6px;
     }
-
-    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75rem; color: var(--text-dim); }
-    .meta .deadline.overdue { color: var(--danger); }
+    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75rem; color: var(--text-dim); flex-wrap: wrap; }
+    .meta .deadline.overdue { color: var(--danger); font-weight: bold; }
 
     .streak {
         color: var(--accent);
@@ -65,33 +62,98 @@
         margin-top: 2px;
     }
 
-    .actions { display: flex; gap: 10px; margin-top: 2px; }
+    .week { display: flex; gap: 3px; margin-top: 4px; }
+    .week .cell { width: 11px; height: 11px; border-radius: 2px; background: var(--off); }
+    .week .cell.on { background: var(--ok); box-shadow: 0 0 6px rgba(79, 209, 160, 0.7); }
 
-    .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 20px; }
+    .actions { display: flex; gap: 10px; margin-top: 2px; position: relative; }
+
+    .menu summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--text-dim);
+        font-size: 1.1rem;
+        line-height: 1;
+        padding: 3px 8px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        transition: color 0.15s, border-color 0.15s;
+    }
+    .menu summary::-webkit-details-marker { display: none; }
+    .menu summary:hover, .menu[open] summary { color: var(--accent); border-color: var(--accent); }
+
+    .menu-content {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 6px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        min-width: 170px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    .menu-content a.link { text-align: left; }
+
+    .note-editor summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 3px 8px;
+    }
+    .note-editor summary::-webkit-details-marker { display: none; }
+    .note-editor summary:hover { color: var(--accent); border-color: var(--accent); }
+    .note-editor form { margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .note-editor textarea {
+        min-height: 60px;
+        background: var(--bg-input);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 6px;
+        font-family: inherit;
+        width: 100%;
+    }
+    .note-editor button { padding: 5px 10px; font-size: 0.8rem; align-self: flex-start; }
+
+    .empty {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+    }
 {% endblock %}
 
 {% block content %}
-    <h2>Tasks</h2>
+    <h2>Bütün Tasklar</h2>
 
     <div class="filter-row">
-        <a class="filter-link {% if active_category == 'all' %}active{% endif %}" href="{% url 'tasks' %}">hamısı</a>
-        <a class="filter-link {% if active_category == 'must' %}active{% endif %}" href="{% url 'tasks' %}?category=must">must do</a>
-        <a class="filter-link {% if active_category == 'better' %}active{% endif %}" href="{% url 'tasks' %}?category=better">better do</a>
+        <a class="filter-link {% if active_filter == 'all' %}active{% endif %}" href="{% url 'tasks' %}">hamısı</a>
+        <a class="filter-link {% if active_filter == 'permanent' %}active{% endif %}" href="{% url 'tasks' %}?filter=permanent">permanent</a>
+        <a class="filter-link {% if active_filter == 'temporary' %}active{% endif %}" href="{% url 'tasks' %}?filter=temporary">keçici</a>
     </div>
 
     <ul>
     {% for item in task_data %}
-        <li>
-            <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
-                {% if item.log.done %}✓{% else %}✗{% endif %}
-            </span>
+        <li class="{% if item.task.is_permanent %}permanent{% else %}temporary{% endif %}">
+            <a class="check-btn task-toggle-btn {% if item.log.done %}done{% elif item.log.is_frozen %}frozen{% else %}undone{% endif %}" href="{% url 'toggle_done' item.log.id %}" title="{% if item.log.is_frozen %}Dondurulub{% else %}Tamamla{% endif %}">{% if item.log.done %}✓{% elif item.log.is_frozen %}D{% else %}—{% endif %}</a>
             <span class="info">
                 <div class="title">
                     {{ item.task.title }}
-                    <span class="cat-badge">{{ item.task.get_category_display }}</span>
-                    {% if not item.task.is_recurring %}
-                        <span class="badge">bir dəfəlik</span>
-                    {% endif %}
+                    {% if item.task.is_focus %}<span class="badge">focus</span>{% endif %}
+                    {% if item.task.is_permanent %}<span class="badge perm">permanent</span>{% endif %}
+                    {% if item.log.is_frozen %}<span class="badge" style="border-color:var(--accent);color:var(--accent);">dondurulub</span>{% endif %}
                 </div>
                 {% if item.task.note or item.task.deadline %}
                     <div class="meta">
@@ -104,14 +166,34 @@
                     </div>
                 {% endif %}
             </span>
-            <span class="streak">{{ item.streak }}</span>
+            <span class="streak" title="Cari ardıcıllıq">{{ item.streak }}</span>
+            <span class="week" title="Son 7 gün">
+            {% for day in item.week %}
+                <span class="cell {% if day.done %}on{% endif %}" title="{{ day.date }}"></span>
+            {% endfor %}
+            </span>
             <span class="actions">
-                <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
-                <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
+                <details class="menu">
+                    <summary>⋮</summary>
+                    <div class="menu-content">
+                        <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus et{% endif %}</a>
+                        <a class="link" href="{% url 'toggle_permanent' item.task.id %}">{% if item.task.is_permanent %}keçici et{% else %}permanent et{% endif %}</a>
+                        <a class="link" href="{% url 'toggle_freeze' item.log.id %}">{% if item.log.is_frozen %}dondurmanı ləğv et{% else %}bu günü dondur{% endif %}</a>
+                        <details class="note-editor">
+                            <summary>qeyd {% if item.task.note %}redaktə et{% else %}əlavə et{% endif %}</summary>
+                            <form method="post" action="{% url 'update_note' item.task.id %}">
+                                {% csrf_token %}
+                                <textarea name="note" rows="3">{{ item.task.note }}</textarea>
+                                <button type="submit">saxla</button>
+                            </form>
+                        </details>
+                        <a class="link" href="{% url 'delete_task' item.task.id %}" onclick="return confirm('Bu task silinsin?');">sil</a>
+                    </div>
+                </details>
             </span>
         </li>
     {% empty %}
-        <div class="empty">Bu kateqoriyada task yoxdur.</div>
+        <div class="empty">Bu filterdə aktiv task yoxdur.</div>
     {% endfor %}
     </ul>
 {% endblock %}

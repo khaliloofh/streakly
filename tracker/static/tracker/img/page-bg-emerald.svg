@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="emGlow1" cx="80%" cy="15%" r="55%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.16" />
+      <stop offset="45%" stop-color="#059669" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="#070e0a" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="emGlow2" cx="20%" cy="90%" r="50%">
+      <stop offset="0%" stop-color="#047857" stop-opacity="0.09" />
+      <stop offset="100%" stop-color="#070e0a" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="emBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050a07" />
+      <stop offset="50%" stop-color="#08120d" />
+      <stop offset="100%" stop-color="#0c1a13" />
+    </linearGradient>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#emBase)" />
+  <rect width="100%" height="100%" fill="url(#emGlow1)" />
+  <rect width="100%" height="100%" fill="url(#emGlow2)" />
+
+  <!-- Organic topographic contour curves -->
+  <g fill="none" stroke="#10b981" stroke-width="1" stroke-opacity="0.05">
+    <path d="M 1100,-50 Q 1400,200 1950,150" />
+    <path d="M 1000,-50 Q 1350,280 1950,230" />
+    <path d="M 900,-50 Q 1300,360 1950,310" />
+    <path d="M 800,-50 Q 1250,440 1950,390" />
+    <path d="M 700,-50 Q 1200,520 1950,470" />
+    <circle cx="1500" cy="180" r="140" stroke-opacity="0.08" />
+    <circle cx="1500" cy="180" r="260" stroke-opacity="0.04" stroke-dasharray="6 10" />
+  </g>
+</svg>

@@ -3,18 +3,10 @@ from django.utils import timezone
 
 
 class Task(models.Model):
-    MUST = 'must'
-    BETTER = 'better'
-    CATEGORY_CHOICES = [
-        (MUST, 'Must do'),
-        (BETTER, 'Better do'),
-    ]
-
     title = models.CharField(max_length=200)
-    category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default=MUST)
     note = models.TextField(blank=True)
     deadline = models.DateField(null=True, blank=True)
-    is_recurring = models.BooleanField(default=True, verbose_name='Hər gün təkrarlansın')
+    is_permanent = models.BooleanField(default=False, verbose_name='Permanent')
     is_focus = models.BooleanField(default=False, verbose_name="Today's Focus")
     created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
@@ -26,8 +18,11 @@ class Task(models.Model):
         from datetime import timedelta
         streak = 0
         day = timezone.localdate()
+        # grace period: bugün hələ done və ya frozen deyilsə, dünəndən say (streak 0-a düşməsin)
+        if not self.logs.filter(date=day).filter(models.Q(done=True) | models.Q(is_frozen=True)).exists():
+            day -= timedelta(days=1)
         while True:
-            log = self.logs.filter(date=day, done=True).first()
+            log = self.logs.filter(date=day).filter(models.Q(done=True) | models.Q(is_frozen=True)).first()
             if log:
                 streak += 1
                 day -= timedelta(days=1)
@@ -50,11 +45,28 @@ class Task(models.Model):
             return False
         return self.deadline < timezone.localdate()
 
+    def best_streak(self):
+        dates = sorted(self.logs.filter(done=True).values_list('date', flat=True))
+        if not dates:
+            return 0
+        from datetime import timedelta
+        best = 1
+        current = 1
+        for i in range(1, len(dates)):
+            if dates[i] == dates[i - 1] + timedelta(days=1):
+                current += 1
+                if current > best:
+                    best = current
+            elif dates[i] > dates[i - 1] + timedelta(days=1):
+                current = 1
+        return best
+
 
 class TaskLog(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='logs')
     date = models.DateField()
     done = models.BooleanField(default=False)
+    is_frozen = models.BooleanField(default=False, verbose_name="Dondurulub")
 
     class Meta:
         unique_together = ('task', 'date')

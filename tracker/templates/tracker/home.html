@@ -9,293 +9,44 @@
         margin-bottom: 20px;
     }
 
-    .page-title { font-size: 1.1rem; font-weight: bold; }
-    .date { color: var(--text-dim); font-size: 0.85rem; }
-
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-bottom: 24px;
-    }
-
-    .stat {
-        text-align: left;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px 18px;
-    }
-    .stat .label {
-        color: var(--text-dim);
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 6px;
-    }
-    .stat .value { font-size: 1.6rem; font-weight: bold; }
-    .stat .value.accent { color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-
-    @media (max-width: 720px) {
-        .stats { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .dashboard-row {
-        display: flex;
-        gap: 10px;
-        align-items: stretch;
-        margin-bottom: 10px;
-    }
-    .dashboard-row > .heatmap-card { flex: 2; margin-bottom: 0; min-width: 0; }
-    .dashboard-row > .streak-card { flex: 1; margin-bottom: 0; min-width: 220px; }
-
-    @media (max-width: 720px) {
-        .dashboard-row { flex-direction: column; }
-    }
-
-    .heatmap-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 24px 20px 16px;
-        margin-bottom: 10px;
-    }
-
-    .heatmap-wrap { overflow-x: auto; padding-top: 16px; }
-    .heatmap-wrap { scrollbar-width: thin; scrollbar-color: var(--border) var(--bg-card); }
-    .heatmap-wrap::-webkit-scrollbar { height: 6px; }
-    .heatmap-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
-    .heatmap-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .heatmap-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .heatmap { display: flex; gap: 3px; width: max-content; }
-    .week-col { display: flex; flex-direction: column; gap: 3px; position: relative; }
-    .month-label { position: absolute; top: -18px; font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
-    .hcell { width: 11px; height: 11px; border-radius: 2px; }
-    .hcell.l0 { background: var(--off); }
-    .hcell.l1 { background: rgba(204, 120, 92, 0.25); }
-    .hcell.l2 { background: rgba(204, 120, 92, 0.5); }
-    .hcell.l3 { background: rgba(204, 120, 92, 0.75); box-shadow: 0 0 4px rgba(204, 120, 92, 0.4); }
-    .hcell.l4 { background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
-
-    .legend { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: var(--text-dim); margin-top: 12px; }
-    .legend .hcell { width: 10px; height: 10px; }
-
-    .streak-card {
-        background:
-            linear-gradient(180deg, rgba(13,13,13,0.45), rgba(13,13,13,0.8) 70%, var(--bg-card)),
-            url("{% static 'tracker/img/streak-bg.png' %}") center / cover no-repeat,
-            var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 24px 18px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 18px;
-    }
-
-    .streak-ring {
-        --pct: 0;
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        background: conic-gradient(var(--accent) min(calc(1% * var(--pct)), 100%), var(--off) 0);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 22px var(--accent-glow);
-    }
-    .streak-ring-inner {
-        width: 122px;
-        height: 122px;
-        border-radius: 50%;
-        background: var(--bg-card);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .streak-num {
-        font-size: 2rem;
-        font-weight: bold;
-        color: var(--accent);
-        text-shadow: 0 0 10px var(--accent-glow);
-        line-height: 1;
-    }
-    .streak-label {
-        font-size: 0.7rem;
-        color: var(--text-dim);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 4px;
-    }
-
-    .milestones {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-    }
-    .milestone {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-    }
-    .milestone-dot {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 1px solid var(--border);
-        color: var(--text-dim);
-        font-size: 0.65rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .milestone.reached .milestone-dot {
-        border-color: var(--accent);
-        color: var(--accent);
-        box-shadow: 0 0 8px var(--accent-glow);
-    }
-    .milestone-label {
-        font-size: 0.65rem;
-        color: var(--text-dim);
-    }
-
-    .week-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 18px 20px;
-        margin-bottom: 10px;
-    }
-    .week-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
-    }
-    .week-card-header .title { font-size: 0.85rem; font-weight: bold; }
-    .week-card-header .total { font-size: 0.8rem; color: var(--text-dim); }
-
-    .week-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
-    }
-    .week-day {
-        text-align: center;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 4px;
-    }
-    .week-day.today { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-    .week-day .wd-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 6px; }
-    .week-day .wd-value { font-size: 0.85rem; font-weight: bold; }
-    .week-day.today .wd-value { color: var(--accent); }
-
-    @media (max-width: 600px) {
-        .week-grid { grid-template-columns: repeat(4, 1fr); row-gap: 8px; }
-    }
-
-    .bottom-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
-    .bottom-row > .week-card, .bottom-row > .focus-card { flex: 1; margin-bottom: 0; min-width: 0; }
-    @media (max-width: 720px) { .bottom-row { flex-direction: column; } }
-
-    .focus-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 18px 20px;
-    }
-    .focus-card .title { font-size: 0.85rem; font-weight: bold; margin-bottom: 14px; display: block; }
-
-    .focus-item { margin-bottom: 14px; }
-    .focus-item:last-child { margin-bottom: 0; }
-    .focus-item-top {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 6px;
-    }
-    .focus-item-top .check { font-size: 0.95rem; width: 16px; text-align: center; }
-    .focus-item-top .name { flex: 1; font-size: 0.85rem; }
-    .focus-item-top .frac { font-size: 0.75rem; color: var(--text-dim); }
-    .focus-bar {
-        height: 5px;
-        border-radius: 3px;
-        background: var(--off);
-        overflow: hidden;
-    }
-    .focus-bar-fill {
-        height: 100%;
-        background: var(--accent);
-        box-shadow: 0 0 6px var(--accent-glow);
-    }
-    .focus-empty { color: var(--text-dim); font-size: 0.8rem; }
-
-    .quote-card {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px 20px;
-        margin-bottom: 10px;
-    }
-    .quote-card img {
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        object-fit: cover;
-        flex-shrink: 0;
-        filter: grayscale(1);
-        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    .quote-card blockquote {
-        margin: 0;
-        font-style: italic;
-        color: var(--text-dim);
-        font-size: 0.9rem;
-        line-height: 1.5;
-    }
+    .page-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.2px; }
+    .date { color: var(--text-dim); font-size: 0.85rem; font-weight: 500; }
 
     form.task-form {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin-bottom: 16px;
     }
 
-    .field-group { margin-bottom: 14px; }
+    .field-group { margin-bottom: 12px; }
     .field-group label {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.8px;
         color: var(--text-dim);
-        margin-bottom: 6px;
+        margin-bottom: 5px;
     }
 
-    .form-row { display: flex; gap: 14px; }
+    .form-row { display: flex; gap: 12px; }
     .form-row .field-group { flex: 1; min-width: 0; }
 
     .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-    .checkbox-row input[type="checkbox"] { width: auto; }
-    .checkbox-row label { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 0; }
-
-    @media (max-width: 600px) { .form-row { flex-direction: column; gap: 0; } }
+    .checkbox-row input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
+    .checkbox-row label { color: var(--text-dim); font-size: 0.82rem; margin-bottom: 0; cursor: pointer; }
 
     input, select, textarea {
         background: var(--bg-input);
         color: var(--text);
         border: 1px solid var(--border);
         border-radius: 5px;
-        padding: 7px 10px;
+        padding: 7px 11px;
         font-family: inherit;
         width: 100%;
+        font-size: 0.85rem;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -304,71 +55,554 @@
         box-shadow: 0 0 8px var(--accent-glow);
     }
 
-    ul { list-style: none; padding: 0; }
+    /* Tasks list styling */
+    ul { list-style: none; padding: 0; margin: 0; }
 
     li {
         display: flex;
         align-items: flex-start;
-        gap: 14px;
+        gap: 12px;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        transition: border-color 0.15s;
+        border-radius: 7px;
+        padding: 11px 14px;
+        margin-bottom: 7px;
+        transition: border-color 0.15s, transform 0.15s;
     }
 
-    li:hover { border-color: var(--accent); }
+    li:hover { border-color: var(--border-hover); }
+    li.permanent { border-left: 3px solid var(--accent); }
+    li.temporary { border-left: 3px solid var(--border); }
 
-    .check { font-size: 1.05rem; width: 18px; text-align: center; margin-top: 2px; }
-    .check.done { color: var(--ok); text-shadow: 0 0 8px rgba(79, 209, 160, 0.6); }
-    .check.undone { color: var(--text-dim); }
-
-    .info { flex: 1; }
-    .title { font-size: 0.95rem; }
+    .info { flex: 1; min-width: 0; }
+    .title { font-size: 0.92rem; font-weight: 500; }
     .badge {
         font-size: 0.65rem;
+        font-weight: 600;
         color: var(--text-dim);
         border: 1px solid var(--border);
         border-radius: 4px;
         padding: 1px 5px;
         margin-left: 6px;
+        letter-spacing: 0.3px;
+    }
+    .badge.perm {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+    .badge.frozen {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(255, 255, 255, 0.03);
     }
 
-    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75rem; color: var(--text-dim); }
-    .meta .deadline.overdue { color: var(--danger); }
+    .meta { display: flex; gap: 10px; margin-top: 4px; font-size: 0.74rem; color: var(--text-dim); flex-wrap: wrap; }
+    .meta .deadline.overdue { color: var(--danger); font-weight: 600; }
 
     .streak {
         color: var(--accent);
-        font-weight: bold;
-        text-shadow: 0 0 8px var(--accent-glow);
+        font-weight: 700;
         min-width: 28px;
         text-align: center;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         margin-top: 2px;
     }
 
     .week { display: flex; gap: 3px; margin-top: 4px; }
-    .week .cell { width: 11px; height: 11px; border-radius: 2px; background: var(--off); }
-    .week .cell.on { background: var(--ok); box-shadow: 0 0 6px rgba(79, 209, 160, 0.7); }
+    .week .cell { width: 10px; height: 10px; border-radius: 2px; background: var(--off); }
+    .week .cell.on { background: var(--ok); box-shadow: 0 0 5px rgba(79, 209, 160, 0.6); }
 
-    .actions { display: flex; gap: 10px; margin-top: 2px; }
+    .actions { display: flex; gap: 10px; margin-top: 2px; position: relative; }
+
+    .menu summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--text-dim);
+        font-size: 1rem;
+        line-height: 1;
+        padding: 2px 7px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        transition: color 0.15s, border-color 0.15s;
+    }
+    .menu summary::-webkit-details-marker { display: none; }
+    .menu summary:hover, .menu[open] summary { color: var(--text); border-color: var(--border-hover); }
+
+    .menu-content {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 6px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 8px;
+        min-width: 160px;
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    .menu-content a.link { text-align: left; }
+
+    .note-editor summary {
+        list-style: none;
+        cursor: pointer;
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 3px 8px;
+    }
+    .note-editor summary::-webkit-details-marker { display: none; }
+    .note-editor summary:hover { color: var(--text); border-color: var(--border-hover); }
+    .note-editor form { margin-top: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .note-editor textarea { min-height: 60px; }
+    .note-editor button { padding: 4px 10px; font-size: 0.78rem; align-self: flex-start; }
+
+    .empty-tasks {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* Stats Grid */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .stat {
+        text-align: left;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        transition: border-color 0.15s;
+    }
+    .stat:hover { border-color: var(--border-hover); }
+    .stat .label {
+        color: var(--text-dim);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 4px;
+    }
+    .stat .value { font-size: 1.5rem; font-weight: 700; }
+    .stat .value.accent { color: var(--accent); }
+
+    @media (max-width: 720px) {
+        .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .dashboard-row {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+        margin-bottom: 14px;
+    }
+    .dashboard-row > .heatmap-card { flex: 2; margin-bottom: 0; min-width: 0; }
+    .dashboard-row > .streak-card { flex: 1; margin-bottom: 0; min-width: 240px; }
+
+    @media (max-width: 720px) {
+        .dashboard-row { flex-direction: column; }
+    }
+
+    .heatmap-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px 18px 14px;
+        margin-bottom: 10px;
+    }
+
+    .heatmap-wrap { overflow-x: auto; padding-top: 14px; scrollbar-width: thin; scrollbar-color: var(--border) var(--bg-card); }
+    .heatmap-wrap::-webkit-scrollbar { height: 6px; }
+    .heatmap-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
+    .heatmap-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .heatmap-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    .heatmap { display: flex; gap: 3px; width: max-content; }
+    .week-col { display: flex; flex-direction: column; gap: 3px; position: relative; }
+    .month-label { position: absolute; top: -16px; font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
+    .hcell { width: 11px; height: 11px; border-radius: 2px; }
+    .hcell.l0 { background: var(--off); }
+    .hcell.l1 { background: rgba(204, 120, 92, 0.25); }
+    .hcell.l2 { background: rgba(204, 120, 92, 0.5); }
+    .hcell.l3 { background: rgba(204, 120, 92, 0.75); }
+    .hcell.l4 { background: var(--accent); box-shadow: 0 0 5px var(--accent-glow); }
+
+    .legend { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-dim); margin-top: 12px; }
+    .legend .hcell { width: 9px; height: 9px; }
+
+    .streak-card {
+        background:
+            linear-gradient(180deg, rgba(13,13,13,0.45), rgba(13,13,13,0.85) 70%, var(--bg-card)),
+            url("{% static 'tracker/img/streak-bg.png' %}") center / cover no-repeat,
+            var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 20px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .streak-ring {
+        --pct: 0;
+        width: 126px;
+        height: 126px;
+        border-radius: 50%;
+        background: conic-gradient(var(--accent) min(calc(1% * var(--pct)), 100%), rgba(255, 255, 255, 0.08) 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .streak-ring-inner {
+        width: 102px;
+        height: 102px;
+        border-radius: 50%;
+        background: rgba(18, 18, 18, 0.48);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .streak-num {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--accent);
+        line-height: 1;
+        opacity: 1 !important;
+        text-shadow: 0 0 10px var(--accent-glow);
+    }
+    .streak-label {
+        font-size: 0.68rem;
+        color: var(--text);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 3px;
+        font-weight: 600;
+        opacity: 1 !important;
+    }
+
+    .milestone-progress-wrap {
+        width: 100%;
+        font-size: 0.74rem;
+        margin-top: -2px;
+    }
+    .milestone-target-text {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-dim);
+        margin-bottom: 4px;
+    }
+    .milestone-target-text strong { color: var(--text); }
+    .milestone-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: var(--off);
+        overflow: hidden;
+    }
+    .milestone-bar-fill {
+        height: 100%;
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent-glow);
+        transition: width 0.3s ease;
+    }
+
+    .milestones {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        gap: 3px;
+    }
+    .milestone-dot {
+        flex: 1;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        font-size: 0.65rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(18, 18, 18, 0.45);
+        backdrop-filter: blur(4px);
+        transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .milestone-dot.reached {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(204, 120, 92, 0.15);
+        box-shadow: 0 0 6px var(--accent-glow);
+    }
+
+    /* Motivational Quote Card */
+    .quote-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin-bottom: 12px;
+        position: relative;
+    }
+    .quote-card img {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        filter: grayscale(1);
+    }
+    .quote-content { flex: 1; min-width: 0; }
+    .quote-card blockquote {
+        margin: 0;
+        font-style: italic;
+        color: var(--text);
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+    .quote-author {
+        font-size: 0.73rem;
+        color: var(--accent);
+        margin-top: 3px;
+        font-weight: 600;
+    }
+    .quote-refresh-btn {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        border-radius: 4px;
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        font-size: 0.85rem;
+        box-shadow: none;
+        transition: color 0.15s, border-color 0.15s;
+    }
+    .quote-refresh-btn:hover {
+        color: var(--text);
+        border-color: var(--border-hover);
+        box-shadow: none;
+        transform: none;
+    }
+
+    /* Productivity Insights */
+    .insight-banner {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .insight-pill {
+        flex: 1;
+        min-width: 170px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 9px 13px;
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .insight-pill strong { color: var(--text); }
+
+    /* Focus & Week */
+    .bottom-row { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+    .bottom-row > .week-card, .bottom-row > .focus-card { flex: 1; margin-bottom: 0; min-width: 0; }
+    @media (max-width: 720px) { .bottom-row { flex-direction: column; } }
+
+    .focus-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 18px;
+    }
+    .focus-card .title { font-size: 0.82rem; font-weight: 600; margin-bottom: 12px; display: block; }
+
+    .focus-item { margin-bottom: 12px; }
+    .focus-item:last-child { margin-bottom: 0; }
+    .focus-item-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+    }
+    .focus-item-top .name { flex: 1; font-size: 0.82rem; font-weight: 500; }
+    .focus-item-top .frac { font-size: 0.72rem; color: var(--text-dim); }
+    .focus-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: var(--off);
+        overflow: hidden;
+    }
+    .focus-bar-fill {
+        height: 100%;
+        background: var(--accent);
+        transition: width 0.3s ease;
+    }
+    .focus-empty { color: var(--text-dim); font-size: 0.78rem; }
+
+    .week-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 18px;
+    }
+    .week-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .week-card-header .title { font-size: 0.82rem; font-weight: 600; }
+    .week-card-header .total { font-size: 0.78rem; color: var(--text-dim); }
+
+    .week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+    }
+    .week-day {
+        text-align: center;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 3px;
+        background: var(--bg-card);
+    }
+    .week-day.today { border-color: var(--accent); }
+    .week-day .wd-label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 4px; }
+    .week-day .wd-value { font-size: 0.82rem; font-weight: 600; }
+    .week-day.today .wd-value { color: var(--accent); }
+
+    @media (max-width: 600px) {
+        .week-grid { grid-template-columns: repeat(4, 1fr); row-gap: 6px; }
+    }
 {% endblock %}
 
 {% block content %}
     <div class="page-header">
         <div class="page-title">Dashboard</div>
-        <div class="date">{{ today }}</div>
+        <div class="date">{{ today|date:"l, d F Y" }}</div>
     </div>
 
+    <!-- Quick Add Task Form -->
+    <form class="task-form" method="post">
+        {% csrf_token %}
+
+        <div class="field-group">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+
+        <div class="form-row">
+            <div class="field-group">
+                {{ form.deadline.label_tag }}
+                {{ form.deadline }}
+            </div>
+            <div class="field-group">
+                {{ form.note.label_tag }}
+                {{ form.note }}
+            </div>
+        </div>
+
+        <div class="checkbox-row">
+            {{ form.is_permanent }}
+            {{ form.is_permanent.label_tag }}
+        </div>
+
+        <button type="submit">+ task əlavə et</button>
+    </form>
+
+    <!-- Gündəlik Tasklar (Moved directly below Add Task Form) -->
+    <h2>Gündəlik Tasklar</h2>
+    <ul>
+    {% for item in task_data %}
+        <li class="{% if item.task.is_permanent %}permanent{% else %}temporary{% endif %}">
+            <a class="check-btn task-toggle-btn {% if item.log.done %}done{% elif item.log.is_frozen %}frozen{% else %}undone{% endif %}" href="{% url 'toggle_done' item.log.id %}" title="{% if item.log.is_frozen %}Dondurulub{% else %}Tamamla{% endif %}">{% if item.log.done %}✓{% elif item.log.is_frozen %}D{% else %}—{% endif %}</a>
+            <span class="info">
+                <div class="title">
+                    {{ item.task.title }}
+                    {% if item.task.is_focus %}<span class="badge">focus</span>{% endif %}
+                    {% if item.task.is_permanent %}<span class="badge perm">permanent</span>{% endif %}
+                    {% if item.log.is_frozen %}<span class="badge frozen">dondurulub</span>{% endif %}
+                </div>
+                {% if item.task.note or item.task.deadline %}
+                    <div class="meta">
+                        {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
+                        {% if item.task.deadline %}
+                            <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
+                                deadline: {{ item.task.deadline }}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </span>
+            <span class="streak" title="Cari ardıcıllıq">{{ item.streak }}</span>
+            <span class="week" title="Son 7 gün">
+            {% for day in item.week %}
+                <span class="cell {% if day.done %}on{% endif %}" title="{{ day.date }}"></span>
+            {% endfor %}
+            </span>
+            <span class="actions">
+                <details class="menu">
+                    <summary>⋮</summary>
+                    <div class="menu-content">
+                        <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus et{% endif %}</a>
+                        <a class="link" href="{% url 'toggle_permanent' item.task.id %}">{% if item.task.is_permanent %}keçici et{% else %}permanent et{% endif %}</a>
+                        <a class="link" href="{% url 'toggle_freeze' item.log.id %}">{% if item.log.is_frozen %}dondurmanı ləğv et{% else %}bu günü dondur{% endif %}</a>
+                        <details class="note-editor">
+                            <summary>qeyd {% if item.task.note %}redaktə et{% else %}əlavə et{% endif %}</summary>
+                            <form method="post" action="{% url 'update_note' item.task.id %}">
+                                {% csrf_token %}
+                                <textarea name="note" rows="3">{{ item.task.note }}</textarea>
+                                <button type="submit">saxla</button>
+                            </form>
+                        </details>
+                        <a class="link" href="{% url 'delete_task' item.task.id %}" onclick="return confirm('Bu task silinsin?');">sil</a>
+                    </div>
+                </details>
+            </span>
+        </li>
+    {% empty %}
+        <div class="empty-tasks">Hələ heç bir aktiv task yoxdur. Yuxarıdakı formdan yeni task əlavə edin!</div>
+    {% endfor %}
+    </ul>
+
+    <!-- Top Stats -->
+    <h2>Ümumi İcmal</h2>
     <div class="stats">
         <div class="stat">
-            <div class="label">tasks</div>
+            <div class="label">aktiv tasks</div>
             <div class="value">{{ total_tasks }}</div>
         </div>
         <div class="stat">
             <div class="label">done today</div>
-            <div class="value accent">{{ done_today }}</div>
+            <div class="value accent" id="stat-done-today">{{ done_today }}</div>
         </div>
         <div class="stat">
             <div class="label">current streak</div>
@@ -380,7 +614,8 @@
         </div>
     </div>
 
-    <h2>Activity</h2>
+    <!-- Heatmap & Streak Ring with Milestones -->
+    <h2>Aktivlik & Streak</h2>
     <div class="dashboard-row">
         <div class="heatmap-card">
             <div class="heatmap-wrap">
@@ -389,7 +624,7 @@
                     <div class="week-col">
                         <div class="month-label">{{ week.label|default:"" }}</div>
                         {% for cell in week.days %}
-                            <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}%{% else %}data yoxdur{% endif %}"></div>
+                            <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}% tamamlanıb{% else %}data yoxdur{% endif %}"></div>
                         {% endfor %}
                     </div>
                 {% endfor %}
@@ -407,69 +642,61 @@
         </div>
 
         <div class="streak-card">
-            <div class="streak-ring" style="--pct: {% widthratio current_streak 90 100 %};">
+            <div class="streak-ring" style="--pct: {% if next_milestone %}{{ progress_pct }}{% else %}100{% endif %};">
                 <div class="streak-ring-inner">
                     <div class="streak-num">{{ current_streak }}</div>
                     <div class="streak-label">Day Streak</div>
                 </div>
             </div>
+
+            {% if next_milestone %}
+            <div class="milestone-progress-wrap">
+                <div class="milestone-target-text">
+                    <span>Hədəf: <strong>{{ next_milestone.title }}</strong> ({{ next_milestone.days }} gün)</span>
+                    <span><strong>{{ days_remaining }}</strong> gün qaldı</span>
+                </div>
+                <div class="milestone-bar">
+                    <div class="milestone-bar-fill" style="width: {{ progress_pct }}%;"></div>
+                </div>
+            </div>
+            {% endif %}
+
             <div class="milestones">
                 {% for m in milestones %}
-                    <div class="milestone {% if m.reached %}reached{% endif %}">
-                        <div class="milestone-dot">{{ m.days }}</div>
-                        <div class="milestone-label">gün</div>
+                    <div class="milestone {% if m.reached %}reached{% endif %}" title="{{ m.title }} ({{ m.days }} gün)">
+                        <div class="milestone-dot">{{ m.icon }}</div>
+                        <div class="milestone-label">{{ m.days }}g</div>
                     </div>
                 {% endfor %}
             </div>
         </div>
     </div>
 
+    <!-- Motivational Quote -->
     <div class="quote-card">
-        <img src="{% static 'tracker/img/quote-bust.png' %}" alt="">
-        <blockquote>"It's not about motivation, it's about the system."</blockquote>
+        <img src="{% static 'tracker/img/quote-bust.png' %}" alt="Quote">
+        <div class="quote-content">
+            <blockquote id="quote-text">"{{ quote.quote }}"</blockquote>
+            <div class="quote-author" id="quote-author">— {{ quote.author }}</div>
+        </div>
+        <button type="button" class="quote-refresh-btn" id="refresh-quote-btn" title="Yeni sitat">↻</button>
     </div>
 
-    <form class="task-form" method="post">
-        {% csrf_token %}
+    <!-- Productivity Insights -->
+    <div class="insight-banner">
+        <div class="insight-pill"><span>Ən məhsuldar gün:</span> <strong>{{ insights.best_day }}</strong></div>
+        <div class="insight-pill"><span>Bu həftə:</span> <strong>{{ insights.done_this_week }} tamamlanma</strong> ({% if insights.diff_pct >= 0 %}+{% endif %}{{ insights.diff_pct }}%)</div>
+        <div class="insight-pill"><span>Davamlılıq:</span> <strong>{{ insights.consistency_score }}%</strong></div>
+    </div>
 
-        <div class="field-group">
-            {{ form.title.label_tag }}
-            {{ form.title }}
-        </div>
-
-        <div class="form-row">
-            <div class="field-group">
-                {{ form.category.label_tag }}
-                {{ form.category }}
-            </div>
-            <div class="field-group">
-                {{ form.deadline.label_tag }}
-                {{ form.deadline }}
-            </div>
-        </div>
-
-        <div class="field-group">
-            {{ form.note.label_tag }}
-            {{ form.note }}
-        </div>
-
-        <div class="checkbox-row">
-            {{ form.is_recurring }}
-            {{ form.is_recurring.label_tag }}
-        </div>
-
-        <button type="submit">+ task əlavə et</button>
-    </form>
-
+    <!-- Focus & Week Breakdown -->
     <div class="bottom-row">
         <div class="focus-card">
             <span class="title">Today's Focus</span>
             {% for item in focus_data %}
                 <div class="focus-item">
                     <div class="focus-item-top">
-                        <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
-                            <a class="link" style="border:none;padding:0;color:inherit;" href="{% url 'toggle_done' item.log.id %}">{% if item.log.done %}✓{% else %}✗{% endif %}</a>
-                        </span>
+                        <a class="check-btn task-toggle-btn {% if item.log.done %}done{% elif item.log.is_frozen %}frozen{% else %}undone{% endif %}" href="{% url 'toggle_done' item.log.id %}" title="{% if item.log.is_frozen %}Dondurulub{% else %}Tamamla{% endif %}">{% if item.log.done %}✓{% elif item.log.is_frozen %}D{% else %}—{% endif %}</a>
                         <span class="name">{{ item.task.title }}</span>
                         <span class="frac">{% if item.log.done %}1{% else %}0{% endif %}/1</span>
                     </div>
@@ -478,13 +705,13 @@
                     </div>
                 </div>
             {% empty %}
-                <div class="focus-empty">Hələ heç bir task "focus" kimi işarələnməyib — aşağıdakı siyahılarda "focus" düyməsinə bas.</div>
+                <div class="focus-empty">Hələ heç bir task "focus" kimi işarələnməyib — yuxarıdakı siyahıda ⋮ menyusundan "focus et" seçə bilərsiniz.</div>
             {% endfor %}
         </div>
 
         <div class="week-card">
             <div class="week-card-header">
-                <span class="title">This Week</span>
+                <span class="title">Bu həftə</span>
                 <span class="total">{{ week_done_sum }} / {{ week_total_sum }} tasks</span>
             </div>
             <div class="week-grid">
@@ -498,87 +725,27 @@
         </div>
     </div>
 
-    <h2>Must do</h2>
-    <ul>
-    {% for item in task_data %}
-        {% if item.task.category == 'must' %}
-            <li>
-                <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
-                    {% if item.log.done %}✓{% else %}✗{% endif %}
-                </span>
-                <span class="info">
-                    <div class="title">
-                        {{ item.task.title }}
-                        {% if not item.task.is_recurring %}
-                            <span class="badge">bir dəfəlik</span>
-                        {% endif %}
-                    </div>
-                    {% if item.task.note or item.task.deadline %}
-                        <div class="meta">
-                            {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
-                            {% if item.task.deadline %}
-                                <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
-                                    deadline: {{ item.task.deadline }}
-                                </span>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </span>
-                <span class="streak">{{ item.streak }}</span>
-                <span class="week">
-                {% for day in item.week %}
-                    <span class="cell {% if day.done %}on{% endif %}"></span>
-                {% endfor %}
-                </span>
-                <span class="actions">
-                    <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
-                    <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus{% endif %}</a>
-                    <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
-                </span>
-            </li>
-        {% endif %}
-    {% endfor %}
-    </ul>
-
-    <h2>Better do</h2>
-    <ul>
-    {% for item in task_data %}
-        {% if item.task.category == 'better' %}
-            <li>
-                <span class="check {% if item.log.done %}done{% else %}undone{% endif %}">
-                    {% if item.log.done %}✓{% else %}✗{% endif %}
-                </span>
-                <span class="info">
-                    <div class="title">
-                        {{ item.task.title }}
-                        {% if not item.task.is_recurring %}
-                            <span class="badge">bir dəfəlik</span>
-                        {% endif %}
-                    </div>
-                    {% if item.task.note or item.task.deadline %}
-                        <div class="meta">
-                            {% if item.task.note %}<span>{{ item.task.note }}</span>{% endif %}
-                            {% if item.task.deadline %}
-                                <span class="deadline {% if item.task.is_overdue %}overdue{% endif %}">
-                                    deadline: {{ item.task.deadline }}
-                                </span>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </span>
-                <span class="streak">{{ item.streak }}</span>
-                <span class="week">
-                {% for day in item.week %}
-                    <span class="cell {% if day.done %}on{% endif %}"></span>
-                {% endfor %}
-                </span>
-                <span class="actions">
-                    <a class="link" href="{% url 'toggle_done' item.log.id %}">toggle</a>
-                    <a class="link" href="{% url 'toggle_focus' item.task.id %}">{% if item.task.is_focus %}unfocus{% else %}focus{% endif %}</a>
-                    <a class="link" href="{% url 'delete_task' item.task.id %}">sil</a>
-                </span>
-            </li>
-        {% endif %}
-    {% endfor %}
-    </ul>
+    <!-- Quote Shuffle Script -->
+    <script>
+        document.getElementById('refresh-quote-btn').addEventListener('click', function() {
+            var btn = this;
+            fetch("{% url 'next_quote' %}")
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var qText = document.getElementById('quote-text');
+                    var qAuthor = document.getElementById('quote-author');
+                    qText.style.opacity = 0;
+                    qAuthor.style.opacity = 0;
+                    setTimeout(function() {
+                        qText.textContent = '"' + data.quote + '"';
+                        qAuthor.textContent = '— ' + data.author;
+                        qText.style.transition = 'opacity 0.4s ease';
+                        qAuthor.style.transition = 'opacity 0.4s ease';
+                        qText.style.opacity = 1;
+                        qAuthor.style.opacity = 1;
+                    }, 200);
+                })
+                .catch(function(err) { console.error('Quote fetch error', err); });
+        });
+    </script>
 {% endblock %}

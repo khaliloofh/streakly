@@ -1,129 +1,27 @@
 from datetime import timedelta, date
-import calendar as cal_module
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib import messages
 from django.conf import settings as django_settings
+from django.http import JsonResponse
+from django.db.models import Count
 
 from .models import Task, TaskLog
 from .forms import TaskForm
+from . import services
 
 
-MILESTONES = [3, 7, 14, 30, 90]
-
-
-def build_heatmap(weeks=53):
-    today = timezone.localdate()
-    start = today - timedelta(weeks=weeks - 1)
-    start -= timedelta(days=start.weekday())
-
-    all_tasks = Task.objects.all()
-
-    week_list = []
-    last_month = None
-    day = start
-    for w in range(weeks):
-        days = []
-        for d in range(7):
-            tasks_that_day = all_tasks.filter(created_at__date__lte=day)
-            total = tasks_that_day.count()
-            if total == 0:
-                percent = None
-                level = 0
-            else:
-                done = TaskLog.objects.filter(task__in=tasks_that_day, date=day, done=True).count()
-                percent = round(done / total * 100)
-                if percent <= 0:
-                    level = 0
-                elif percent <= 25:
-                    level = 1
-                elif percent <= 50:
-                    level = 2
-                elif percent <= 75:
-                    level = 3
-                else:
-                    level = 4
-            days.append({'date': day, 'percent': percent, 'level': level})
-            day += timedelta(days=1)
-
-        month_name = days[0]['date'].strftime('%b').lower()
-        label = month_name if month_name != last_month else None
-        last_month = month_name
-        week_list.append({'days': days, 'label': label})
-
-    return week_list
-
-
-def get_task_data(tasks):
-    today = timezone.localdate()
-    data = []
-    for task in tasks:
-        if task.is_recurring:
-            log, _ = TaskLog.objects.get_or_create(task=task, date=today)
-        else:
-            log = task.logs.order_by('-date').first()
-            if log is None:
-                log = TaskLog.objects.create(task=task, date=today, done=False)
-        data.append({
-            'task': task,
-            'log': log,
-            'streak': task.current_streak(),
-            'week': task.last_n_days(7),
-        })
-    return data
-
-
-def overall_streak():
-    """Ümumi 'Day Streak': 'must do' kateqoriyalı bütün aktiv task-ların
-    o gün 100% done olduğu, bu gündən geriyə ardıcıl gün sayı.
-    Həmin gün heç bir 'must' task yoxdursa, streak dayanır."""
-    today = timezone.localdate()
-    streak = 0
-    day = today
-    while True:
-        must_tasks = Task.objects.filter(
-            category=Task.MUST,
-            is_active=True,
-            created_at__date__lte=day,
-        )
-        if not must_tasks.exists():
-            break
-        done_count = TaskLog.objects.filter(
-            task__in=must_tasks, date=day, done=True
-        ).count()
-        if done_count < must_tasks.count():
-            break
-        streak += 1
-        day -= timedelta(days=1)
-    return streak
-
-
-def current_week_summary():
-    """Cari həftə (Bazar ertəsi - Bazar) üçün hər gün neçə task bitib
-    / cəmi neçə task var idi."""
-    today = timezone.localdate()
-    monday = today - timedelta(days=today.weekday())
-    all_tasks = Task.objects.all()
-    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
-    days = []
-    for i in range(7):
-        day = monday + timedelta(days=i)
-        tasks_that_day = all_tasks.filter(created_at__date__lte=day)
-        total = tasks_that_day.count()
-        done = TaskLog.objects.filter(task__in=tasks_that_day, date=day, done=True).count()
-        days.append({
-            'label': labels[i],
-            'date': day,
-            'done': done,
-            'total': total,
-            'is_today': day == today,
-        })
-    return days
+def _safe_redirect(request, fallback='home'):
+    referer = request.META.get('HTTP_REFERER')
+    if referer and referer.startswith(('http://', 'https://', '/')):
+        return redirect(referer)
+    return redirect(fallback)
 
 
 def home(request):
+    services.rollover_transient_tasks()
+
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -134,22 +32,23 @@ def home(request):
         form = TaskForm()
 
     today = timezone.localdate()
-    tasks = Task.objects.filter(is_active=True)
-    task_data = get_task_data(tasks)
+    tasks = Task.objects.filter(is_active=True).order_by('-is_focus', '-created_at')
+    task_data = services.get_optimized_task_data(tasks, today=today)
 
     total_tasks = len(task_data)
-    done_today = sum(1 for item in task_data if item['log'].done)
+    done_today = sum(1 for item in task_data if item['log'] and item['log'].done)
     best_streak = max((item['streak'] for item in task_data), default=0)
-    heatmap = build_heatmap(weeks=53)
+    current_streak = services.get_overall_streak(today=today)
 
-    current_streak = overall_streak()
-    milestones = [{'days': m, 'reached': current_streak >= m} for m in MILESTONES]
-    week_summary = current_week_summary()
+    milestone_info = services.get_milestone_info(current_streak)
+    heatmap = services.build_optimized_heatmap(weeks=53, today=today)
+    week_summary = services.current_week_summary(today=today)
     week_done_sum = sum(d['done'] for d in week_summary)
     week_total_sum = sum(d['total'] for d in week_summary)
 
-    focus_tasks = Task.objects.filter(is_active=True, is_focus=True)
-    focus_data = get_task_data(focus_tasks)
+    focus_data = [item for item in task_data if item['task'].is_focus]
+    quote_data = services.get_quote_for_day(today=today)
+    insights = services.get_productivity_insights(today=today)
 
     context = {
         'task_data': task_data,
@@ -159,12 +58,18 @@ def home(request):
         'done_today': done_today,
         'best_streak': best_streak,
         'current_streak': current_streak,
-        'milestones': milestones,
+        'milestones': milestone_info['milestones'],
+        'current_milestone': milestone_info['current_milestone'],
+        'next_milestone': milestone_info['next_milestone'],
+        'progress_pct': milestone_info['progress_pct'],
+        'days_remaining': milestone_info['days_remaining'],
         'week_summary': week_summary,
         'week_done_sum': week_done_sum,
         'week_total_sum': week_total_sum,
         'focus_data': focus_data,
         'heatmap': heatmap,
+        'quote': quote_data,
+        'insights': insights,
         'active_page': 'dashboard',
     }
     return render(request, 'tracker/home.html', context)
@@ -173,27 +78,73 @@ def home(request):
 def toggle_done(request, log_id):
     log = get_object_or_404(TaskLog, id=log_id)
     log.done = not log.done
+    if log.done:
+        log.is_frozen = False
+    log.save(update_fields=['done', 'is_frozen'])
 
-    if log.done and not log.task.is_recurring:
-        log.date = timezone.localdate()
-        log.task.is_active = False
-        log.task.save()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+        streak = log.task.current_streak()
+        overall = services.get_overall_streak()
+        return JsonResponse({
+            'success': True,
+            'done': log.done,
+            'frozen': log.is_frozen,
+            'task_id': log.task.id,
+            'streak': streak,
+            'overall_streak': overall,
+        })
 
-    log.save()
-    return redirect('home')
+    return _safe_redirect(request, 'home')
+
+
+def toggle_freeze(request, log_id):
+    log = get_object_or_404(TaskLog, id=log_id)
+    log.is_frozen = not log.is_frozen
+    if log.is_frozen:
+        log.done = False
+    log.save(update_fields=['is_frozen', 'done'])
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+        return JsonResponse({
+            'success': True,
+            'frozen': log.is_frozen,
+            'done': log.done,
+            'task_id': log.task.id,
+            'streak': log.task.current_streak(),
+        })
+
+    messages.success(request, f'"{log.task.title}" donduruldu.' if log.is_frozen else 'Dondurma ləğv edildi.')
+    return _safe_redirect(request, 'home')
 
 
 def toggle_focus(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.is_focus = not task.is_focus
-    task.save()
-    return redirect('home')
+    task.save(update_fields=['is_focus'])
+    return _safe_redirect(request, 'home')
+
+
+def toggle_permanent(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.is_permanent = not task.is_permanent
+    task.save(update_fields=['is_permanent'])
+    return _safe_redirect(request, 'home')
+
+
+def update_note(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == 'POST':
+        task.note = request.POST.get('note', '').strip()
+        task.save(update_fields=['note'])
+        messages.success(request, 'Qeyd yeniləndi!')
+    return _safe_redirect(request, 'home')
 
 
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.delete()
-    return redirect('home')
+    messages.success(request, 'Task silindi.')
+    return _safe_redirect(request, 'home')
 
 
 def history(request):
@@ -202,7 +153,7 @@ def history(request):
         TaskLog.objects
         .select_related('task')
         .filter(date__lt=today)
-        .order_by('-date')
+        .order_by('-date', 'task__title')
     )
 
     days = {}
@@ -226,15 +177,20 @@ def history(request):
 
 
 def tasks_view(request):
-    category = request.GET.get('category', 'all')
-    tasks = Task.objects.filter(is_active=True)
-    if category in ('must', 'better'):
-        tasks = tasks.filter(category=category)
-    task_data = get_task_data(tasks)
+    services.rollover_transient_tasks()
+
+    filter_type = request.GET.get('filter', 'all')
+    tasks = Task.objects.filter(is_active=True).order_by('-created_at')
+    if filter_type == 'permanent':
+        tasks = tasks.filter(is_permanent=True)
+    elif filter_type == 'temporary':
+        tasks = tasks.filter(is_permanent=False)
+
+    task_data = services.get_optimized_task_data(tasks)
 
     context = {
         'task_data': task_data,
-        'active_category': category,
+        'active_filter': filter_type,
         'active_page': 'tasks',
     }
     return render(request, 'tracker/tasks.html', context)
@@ -245,41 +201,7 @@ def calendar_view(request, year=None, month=None):
     year = year or today.year
     month = month or today.month
 
-    first_day = date(year, month, 1)
-    all_tasks = Task.objects.all()
-
-    weeks = []
-    cal_obj = cal_module.Calendar(firstweekday=0)
-    for week in cal_obj.monthdatescalendar(year, month):
-        week_days = []
-        for day in week:
-            in_month = day.month == month
-            tasks_that_day = all_tasks.filter(created_at__date__lte=day)
-            total = tasks_that_day.count()
-            if total == 0:
-                percent = None
-                level = 0
-            else:
-                done = TaskLog.objects.filter(task__in=tasks_that_day, date=day, done=True).count()
-                percent = round(done / total * 100)
-                if percent <= 0:
-                    level = 0
-                elif percent <= 25:
-                    level = 1
-                elif percent <= 50:
-                    level = 2
-                elif percent <= 75:
-                    level = 3
-                else:
-                    level = 4
-            week_days.append({
-                'date': day,
-                'in_month': in_month,
-                'percent': percent,
-                'level': level,
-                'is_today': day == today,
-            })
-        weeks.append(week_days)
+    weeks, first_day = services.build_optimized_calendar(year, month, today=today)
 
     if month == 1:
         prev_year, prev_month = year - 1, 12
@@ -303,23 +225,35 @@ def calendar_view(request, year=None, month=None):
 
 
 def statistics_view(request):
-    active_tasks = Task.objects.filter(is_active=True)
+    active_tasks = list(Task.objects.filter(is_active=True))
 
-    total_tasks = active_tasks.count()
+    total_tasks = len(active_tasks)
     total_completed_logs = TaskLog.objects.filter(done=True).count()
     total_logs = TaskLog.objects.count()
     completion_rate = round(total_completed_logs / total_logs * 100) if total_logs else 0
 
     per_task = []
-    for task in active_tasks:
-        per_task.append({
-            'task': task,
-            'streak': task.current_streak(),
-            'completions': task.logs.filter(done=True).count(),
-        })
-    per_task.sort(key=lambda x: x['streak'], reverse=True)
+    task_ids = [t.id for t in active_tasks]
+    done_counts_by_task = dict(
+        TaskLog.objects.filter(task_id__in=task_ids, done=True)
+        .values('task_id')
+        .annotate(cnt=Count('id'))
+        .values_list('task_id', 'cnt')
+    )
 
-    best_streak = per_task[0]['streak'] if per_task else 0
+    optimized_data = services.get_optimized_task_data(active_tasks)
+    for item in optimized_data:
+        t = item['task']
+        per_task.append({
+            'task': t,
+            'streak': item['streak'],
+            'best_streak': t.best_streak(),
+            'completions': done_counts_by_task.get(t.id, 0),
+        })
+    per_task.sort(key=lambda x: (x['streak'], x['best_streak']), reverse=True)
+
+    best_streak = max((row['streak'] for row in per_task), default=0)
+    insights = services.get_productivity_insights(today=timezone.localdate())
 
     context = {
         'total_tasks': total_tasks,
@@ -327,6 +261,7 @@ def statistics_view(request):
         'completion_rate': completion_rate,
         'per_task': per_task,
         'best_streak': best_streak,
+        'insights': insights,
         'active_page': 'statistics',
     }
     return render(request, 'tracker/statistics.html', context)
@@ -334,22 +269,45 @@ def statistics_view(request):
 
 def settings_view(request):
     archived_tasks = Task.objects.filter(is_active=False).order_by('-created_at')
+    custom_wall_path = django_settings.BASE_DIR / 'tracker' / 'static' / 'tracker' / 'img' / 'custom-user-wallpaper.png'
+    has_custom_wallpaper = custom_wall_path.exists()
     context = {
         'archived_tasks': archived_tasks,
         'time_zone': django_settings.TIME_ZONE,
+        'has_custom_wallpaper': has_custom_wallpaper,
         'active_page': 'settings',
     }
     return render(request, 'tracker/settings.html', context)
 
 
+def upload_wallpaper(request):
+    if request.method == 'POST' and request.FILES.get('wallpaper_file'):
+        img = request.FILES['wallpaper_file']
+        dest = django_settings.BASE_DIR / 'tracker' / 'static' / 'tracker' / 'img' / 'custom-user-wallpaper.png'
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        with open(dest, 'wb+') as f:
+            for chunk in img.chunks():
+                f.write(chunk)
+        messages.success(request, 'Xüsusi arxa plan şəkli yadda saxlanıldı.')
+    return redirect('settings')
+
+
+def reset_wallpaper(request):
+    if request.method == 'POST':
+        dest = django_settings.BASE_DIR / 'tracker' / 'static' / 'tracker' / 'img' / 'custom-user-wallpaper.png'
+        if dest.exists():
+            dest.unlink()
+        messages.success(request, 'Arxa plan şəkli defolta qaytarıldı.')
+    return redirect('settings')
+
+
 def restore_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.is_active = True
-    task.save()
-    if not task.is_recurring:
-        TaskLog.objects.get_or_create(task=task, date=timezone.localdate(), defaults={'done': False})
+    task.save(update_fields=['is_active'])
+    TaskLog.objects.get_or_create(task=task, date=timezone.localdate(), defaults={'done': False})
     messages.success(request, 'Task bərpa olundu!')
-    return redirect('settings')
+    return _safe_redirect(request, 'settings')
 
 
 def reset_all(request):
@@ -358,3 +316,39 @@ def reset_all(request):
         Task.objects.all().delete()
         messages.success(request, 'Bütün data silindi.')
     return redirect('settings')
+
+
+def export_backup(request):
+    import json
+    from django.http import HttpResponse
+    data = services.export_all_data_to_dict()
+    filename = f"streakly_backup_{timezone.localdate().isoformat()}.json"
+    response = HttpResponse(
+        json.dumps(data, indent=2, ensure_ascii=False),
+        content_type='application/json'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def import_backup(request):
+    import json
+    if request.method == 'POST' and request.FILES.get('backup_file'):
+        try:
+            content = request.FILES['backup_file'].read().decode('utf-8')
+            data = json.loads(content)
+            t_cnt, l_cnt = services.import_data_from_dict(data)
+            messages.success(request, f"Uğurla {t_cnt} task və {l_cnt} log bərpa edildi!")
+        except Exception as e:
+            messages.error(request, f"Bərpa zamanı xəta: {str(e)}")
+    else:
+        messages.error(request, "Zəhmət olmasa düzgün JSON backup faylı seçin.")
+    return redirect('settings')
+
+
+def next_quote(request):
+    """Returns a random quote for interactive shuffling."""
+    import random
+    idx = random.randint(0, len(services.QUOTES) - 1)
+    q = services.QUOTES[idx]
+    return JsonResponse(q)

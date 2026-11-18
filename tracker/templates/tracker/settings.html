@@ -4,49 +4,227 @@
     .info-row {
         display: flex;
         justify-content: space-between;
-        padding: 10px 0;
+        align-items: center;
+        padding: 12px 0;
         border-bottom: 1px solid var(--border);
         font-size: 0.85rem;
     }
     .info-row:last-child { border-bottom: none; }
     .info-row .label { color: var(--text-dim); }
 
-    ul { list-style: none; padding: 0; }
+    .theme-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .theme-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 12px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transition: border-color 0.15s, transform 0.15s;
+    }
+    .theme-card:hover {
+        border-color: var(--border-hover);
+        transform: translateY(-1px);
+    }
+    .theme-card.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .theme-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .theme-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    /* Switch toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 22px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: var(--off);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        transition: 0.2s;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--text-dim);
+        border-radius: 50%;
+        transition: 0.2s;
+    }
+    input:checked + .slider {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+    input:checked + .slider:before {
+        transform: translateX(18px);
+        background-color: #0d0d0d;
+    }
+
+    ul { list-style: none; padding: 0; margin: 0; }
     li {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 16px;
-        margin-bottom: 8px;
-        font-size: 0.85rem;
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 6px;
+        font-size: 0.82rem;
     }
 
-    .empty { color: var(--text-dim); font-size: 0.85rem; margin-top: 10px; }
+    .empty { color: var(--text-dim); font-size: 0.82rem; margin-top: 10px; }
 
     .danger-zone {
         border: 1px solid var(--danger);
-        border-radius: 10px;
-        padding: 16px 20px;
+        border-radius: 8px;
+        padding: 18px 20px;
         margin-top: 10px;
+        background: rgba(226, 87, 76, 0.03);
     }
 
-    .danger-zone p { font-size: 0.8rem; color: var(--text-dim); margin-top: 0; }
+    .danger-zone p { font-size: 0.8rem; color: var(--text-dim); margin-top: 0; margin-bottom: 12px; }
+
+    .wallpaper-upload-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+    .wallpaper-upload-box input[type="file"] {
+        width: auto;
+        padding: 5px 8px;
+        font-size: 0.8rem;
+    }
 {% endblock %}
 
 {% block content %}
-    <h2>Settings</h2>
+    <h2>Görünüş & Temalar</h2>
 
+    <div class="card">
+        <div class="info-row">
+            <span class="label">Arxa fon şəkli (Wallpaper)</span>
+            <label class="switch">
+                <input type="checkbox" id="wallpaper-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Səs effekti (Tamamlama Chime-i)</span>
+            <label class="switch">
+                <input type="checkbox" id="sound-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div style="margin-top: 14px;">
+            <span class="label" style="font-size: 0.78rem; color: var(--text-dim);">Tema seçimi (Sidebar seçilmiş temanın rəng və arxa planını saxlayır):</span>
+            <div class="theme-grid">
+                <div class="theme-card" data-theme-val="ember">
+                    <div class="theme-swatch" style="background: #CC785C;"></div>
+                    <span class="theme-title">Ember</span>
+                </div>
+                <div class="theme-card" data-theme-val="cyber">
+                    <div class="theme-swatch" style="background: #00f2fe;"></div>
+                    <span class="theme-title">Cyber</span>
+                </div>
+                <div class="theme-card" data-theme-val="emerald">
+                    <div class="theme-swatch" style="background: #10b981;"></div>
+                    <span class="theme-title">Emerald</span>
+                </div>
+                <div class="theme-card" data-theme-val="amethyst">
+                    <div class="theme-swatch" style="background: #c084fc;"></div>
+                    <span class="theme-title">Amethyst</span>
+                </div>
+                <div class="theme-card" data-theme-val="monochrome">
+                    <div class="theme-swatch" style="background: #e5e5e5;"></div>
+                    <span class="theme-title">Mono</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Xüsusi Arxa Plan (Custom Wallpaper)</h2>
+    <div class="card">
+        <div class="info-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+            <div>
+                <strong style="font-size: 0.85rem; display: block;">Öz Arxa Plan Şəklini Yüklə</strong>
+                <span style="font-size: 0.76rem; color: var(--text-dim);">İstədiyiniz şəkli seçərək ana səhifənin arxa planını fərdiləşdirin. Sidebar seçdiyiniz temanın üslubunda qalacaq.</span>
+            </div>
+            <div class="wallpaper-upload-box">
+                <input type="file" id="custom-wallpaper-input" accept="image/*">
+                <button type="button" id="apply-custom-wall-btn" style="padding: 6px 14px; font-size: 0.8rem;">Tətbiq et</button>
+                <button type="button" id="reset-custom-wall-btn" class="link" style="padding: 6px 14px; font-size: 0.8rem; cursor: pointer; background: transparent;">Defolt tematik fona qayıt</button>
+            </div>
+            <div id="wallpaper-status" style="font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none;">Xüsusi arxa plan aktivdir.</div>
+        </div>
+    </div>
+
+    <h2>Yedəkləmə & Məlumat İdarəsi (Backup & Restore)</h2>
+    <div class="card">
+        <div class="info-row">
+            <div>
+                <strong style="font-size: 0.85rem; display: block;">Məlumatları Export Et</strong>
+                <span style="font-size: 0.76rem; color: var(--text-dim);">Bütün taskları, tarixləri və qeydləri JSON faylı kimi yükləyin.</span>
+            </div>
+            <a class="btn" href="{% url 'export_backup' %}" style="padding: 6px 14px; font-size: 0.8rem;">Yüklə (JSON)</a>
+        </div>
+        <div class="info-row" style="align-items: flex-start; padding-top: 14px;">
+            <div>
+                <strong style="font-size: 0.85rem; display: block;">Yedəkdən Bərpa Et (Import)</strong>
+                <span style="font-size: 0.76rem; color: var(--text-dim);">Əvvəlki Streakly JSON faylını seçərək bərpa edin.</span>
+            </div>
+            <form method="post" action="{% url 'import_backup' %}" enctype="multipart/form-data" style="display: flex; gap: 8px; align-items: center;">
+                {% csrf_token %}
+                <input type="file" name="backup_file" accept=".json" required style="width: auto; padding: 4px; font-size: 0.75rem;">
+                <button type="submit" style="padding: 6px 12px; font-size: 0.8rem;">Bərpa et</button>
+            </form>
+        </div>
+    </div>
+
+    <h2>Sistem Parametrləri</h2>
     <div class="card">
         <div class="info-row">
             <span class="label">Time zone</span>
             <span>{{ time_zone }}</span>
         </div>
+        <div class="info-row">
+            <span class="label">Versiya</span>
+            <span>Streakly 1.3 (Inter Clean)</span>
+        </div>
     </div>
 
-    <h2>Arxivlənmiş tasklar</h2>
+    <h2>Arxivlənmiş Tasklar</h2>
     {% if archived_tasks %}
         <ul>
         {% for task in archived_tasks %}
@@ -60,12 +238,125 @@
         <div class="empty">Arxivlənmiş task yoxdur.</div>
     {% endif %}
 
-    <h2>Danger zone</h2>
+    <h2>Təhlükəli Zona</h2>
     <div class="danger-zone">
-        <p>Bu, bütün task-ları və tarixçəni həmişəlik siləcək. Geri qaytarıla bilməz.</p>
-        <form method="post" action="{% url 'reset_all' %}" onsubmit="return confirm('Əminsən? Bütün data silinəcək.');">
+        <p>Bu, bütün task-ları və tarixçəni həmişəlik siləcək. Bu əməliyyat geri qaytarıla bilməz.</p>
+        <form method="post" action="{% url 'reset_all' %}" onsubmit="return confirm('Əminsən? Bütün data həmişəlik silinəcək.');">
             {% csrf_token %}
             <button type="submit" class="danger">Bütün datanı sil</button>
         </form>
     </div>
+
+    <script>
+        // Theme selection script
+        (function() {
+            var currentTheme = localStorage.getItem('streakly_theme') || 'ember';
+            var cards = document.querySelectorAll('.theme-card');
+
+            function setActiveCard(theme) {
+                cards.forEach(function(c) {
+                    if (c.getAttribute('data-theme-val') === theme) {
+                        c.classList.add('active');
+                    } else {
+                        c.classList.remove('active');
+                    }
+                });
+                var ind = document.getElementById('theme-indicator');
+                var themeNames = {
+                    'ember': 'Ember',
+                    'cyber': 'Cyber',
+                    'emerald': 'Emerald',
+                    'amethyst': 'Amethyst',
+                    'monochrome': 'Mono'
+                };
+                if (ind && themeNames[theme]) ind.textContent = themeNames[theme];
+            }
+
+            setActiveCard(currentTheme);
+
+            cards.forEach(function(card) {
+                card.addEventListener('click', function() {
+                    var val = this.getAttribute('data-theme-val');
+                    document.documentElement.setAttribute('data-theme', val);
+                    localStorage.setItem('streakly_theme', val);
+                    setActiveCard(val);
+                });
+            });
+
+            // Wallpaper toggle script
+            var wallToggle = document.getElementById('wallpaper-toggle');
+            var isWallOn = localStorage.getItem('streakly_wallpaper') !== 'off';
+            wallToggle.checked = isWallOn;
+
+            wallToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.classList.remove('no-wallpaper');
+                    localStorage.setItem('streakly_wallpaper', 'on');
+                } else {
+                    document.documentElement.classList.add('no-wallpaper');
+                    localStorage.setItem('streakly_wallpaper', 'off');
+                }
+            });
+
+            // Sound toggle script
+            var soundToggle = document.getElementById('sound-toggle');
+            var isSoundOn = localStorage.getItem('streakly_sound') !== 'off';
+            soundToggle.checked = isSoundOn;
+
+            soundToggle.addEventListener('change', function() {
+                localStorage.setItem('streakly_sound', this.checked ? 'on' : 'off');
+                if (this.checked && window.playStreaklyChime) {
+                    window.playStreaklyChime();
+                }
+            });
+
+            // Custom Wallpaper Upload & Reset
+            var customWallInput = document.getElementById('custom-wallpaper-input');
+            var applyWallBtn = document.getElementById('apply-custom-wall-btn');
+            var resetWallBtn = document.getElementById('reset-custom-wall-btn');
+            var wallStatus = document.getElementById('wallpaper-status');
+
+            function checkWallStatus() {
+                var stored = localStorage.getItem('streakly_custom_wallpaper');
+                if (stored) {
+                    wallStatus.style.display = 'block';
+                    wallStatus.textContent = 'Xüsusi arxa plan aktivdir.';
+                } else {
+                    wallStatus.style.display = 'none';
+                }
+            }
+            checkWallStatus();
+
+            applyWallBtn.addEventListener('click', function() {
+                if (!customWallInput.files || !customWallInput.files[0]) {
+                    alert('Zəhmət olmasa bir şəkil faylı seçin.');
+                    return;
+                }
+                var file = customWallInput.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var dataUrl = e.target.result;
+                    try {
+                        localStorage.setItem('streakly_custom_wallpaper', dataUrl);
+                        document.documentElement.classList.add('has-custom-wallpaper');
+                        document.documentElement.style.setProperty('--custom-page-bg', 'url("' + dataUrl + '")');
+                        checkWallStatus();
+                        alert('Xüsusi arxa plan uğurla tətbiq edildi!');
+                    } catch (err) {
+                        alert('Şəkil ölçüsü çox böyükdür, daha yüngül bir şəkil seçin.');
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+
+            resetWallBtn.addEventListener('click', function() {
+                localStorage.removeItem('streakly_custom_wallpaper');
+                document.documentElement.classList.remove('has-custom-wallpaper');
+                document.documentElement.style.removeProperty('--custom-page-bg');
+                customWallInput.value = '';
+                checkWallStatus();
+                alert('Defolt tematik arxa plana qayıdıldı.');
+            });
+        })();
+    </script>
 {% endblock %}
