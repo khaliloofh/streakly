@@ -230,15 +230,34 @@
     .heatmap-wrap::-webkit-scrollbar-track { background: var(--bg-card); }
     .heatmap-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     .heatmap-wrap::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-    .heatmap { display: flex; gap: 3px; width: max-content; }
-    .week-col { display: flex; flex-direction: column; gap: 3px; position: relative; }
+    .heatmap { display: flex; gap: 4px; width: 100%; }
+    .week-col { display: flex; flex-direction: column; gap: 4px; position: relative; flex: 1; }
     .month-label { position: absolute; top: -16px; font-size: 0.65rem; color: var(--text-dim); white-space: nowrap; }
-    .hcell { width: 11px; height: 11px; border-radius: 2px; }
+        .heatmap-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .heatmap-month-title { font-size: 0.85rem; font-weight: 600; color: var(--text); text-transform: capitalize; }
+    .heatmap-nav {
+        color: var(--text-dim);
+        font-size: 1rem;
+        padding: 2px 9px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .heatmap-nav:hover { color: var(--text); border-color: var(--border-hover); }
+    .hcell.out-month { opacity: 0.3; }
+    .hcell { width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: 3px; }
     .hcell.l0 { background: var(--off); }
     .hcell.l1 { background: rgba(204, 120, 92, 0.25); }
     .hcell.l2 { background: rgba(204, 120, 92, 0.5); }
     .hcell.l3 { background: rgba(204, 120, 92, 0.75); }
     .hcell.l4 { background: var(--accent); box-shadow: 0 0 5px var(--accent-glow); }
+    .hcell.current-month { outline: 1px solid var(--accent); outline-offset: 1px; }
 
     .legend { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-dim); margin-top: 12px; }
     .legend .hcell { width: 9px; height: 9px; }
@@ -502,6 +521,56 @@
     @media (max-width: 600px) {
         .week-grid { grid-template-columns: repeat(4, 1fr); row-gap: 6px; }
     }
+
+    /* Weekly Goals */
+    .weekly-goals-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin-bottom: 20px;
+    }
+    .weekly-goals-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    .weekly-goals-header .title { font-size: 0.95rem; font-weight: 600; }
+    .weekly-goals-header .total { font-size: 0.78rem; color: var(--text-dim); }
+
+    form.weekly-goal-form {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    form.weekly-goal-form input[name="title"] { flex: 2; }
+    form.weekly-goal-form input[name="note"] { flex: 3; }
+    form.weekly-goal-form button { white-space: nowrap; }
+
+    @media (max-width: 600px) {
+        form.weekly-goal-form { flex-direction: column; }
+    }
+
+    .weekly-goal-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 10px 14px;
+        margin-bottom: 7px;
+        transition: border-color 0.15s;
+    }
+    .weekly-goal-item:hover { border-color: var(--border-hover); }
+    .weekly-goal-item .info { flex: 1; min-width: 0; }
+    .weekly-goal-item .title { font-size: 0.88rem; font-weight: 500; }
+    .weekly-goal-item .meta { font-size: 0.74rem; color: var(--text-dim); margin-top: 2px; }
+    .weekly-goal-item .streak { color: var(--accent); font-weight: 700; font-size: 0.85rem; min-width: 60px; text-align: right; }
+    .weekly-goal-item .del-link { color: var(--text-dim); font-size: 0.8rem; margin-left: 8px; }
+    .weekly-goal-item .del-link:hover { color: var(--danger); }
+
+    .weekly-goals-empty { color: var(--text-dim); font-size: 0.85rem; padding: 8px 0; }
 {% endblock %}
 
 {% block content %}
@@ -593,6 +662,44 @@
     {% endfor %}
     </ul>
 
+    <!-- Həftəlik Hədəflər -->
+    <div class="weekly-goals-card">
+        <div class="weekly-goals-header">
+            <span class="title">Həftəlik Hədəflər</span>
+            <span class="total">{{ weekly_goals_done }} / {{ weekly_goals_total }} bu həftə</span>
+        </div>
+
+        <form class="weekly-goal-form" method="post" action="{% url 'add_weekly_goal' %}">
+            {% csrf_token %}
+            {{ weekly_goal_form.title }}
+            {{ weekly_goal_form.note }}
+            <button type="submit">+ əlavə et</button>
+        </form>
+
+        {% for item in weekly_goal_data %}
+            <div class="weekly-goal-item">
+                <a class="check-btn task-toggle-btn {% if item.log.done %}done{% else %}undone{% endif %}" href="{% url 'toggle_weekly_goal' item.log.id %}" title="Bu həftə tamamlandı">{% if item.log.done %}✓{% else %}—{% endif %}</a>
+                <span class="info">
+                    <div class="title">{{ item.goal.title }}</div>
+                    {% if item.goal.note %}<div class="meta">{{ item.goal.note }}</div>{% endif %}
+                </span>
+                <span class="streak" title="Ardıcıl neçə həftədir tamamlanıb">{{ item.streak }} həftə</span>
+                <details class="note-editor">
+                    <summary>redaktə et</summary>
+                    <form method="post" action="{% url 'edit_weekly_goal' item.goal.id %}">
+                        {% csrf_token %}
+                        <input type="text" name="title" value="{{ item.goal.title }}" placeholder="Başlıq">
+                        <textarea name="note" rows="2" placeholder="Qeyd">{{ item.goal.note }}</textarea>
+                        <button type="submit">saxla</button>
+                    </form>
+                </details>
+                <a class="del-link" href="{% url 'delete_weekly_goal' item.goal.id %}" onclick="return confirm('Bu həftəlik hədəf silinsin?');">sil</a>
+            </div>
+        {% empty %}
+            <div class="weekly-goals-empty">Hələ heç bir həftəlik hədəf yoxdur. Yuxarıdakı formdan əlavə edin.</div>
+        {% endfor %}
+    </div>
+
     <!-- Top Stats -->
     <h2>Ümumi İcmal</h2>
     <div class="stats">
@@ -624,7 +731,7 @@
                     <div class="week-col">
                         <div class="month-label">{{ week.label|default:"" }}</div>
                         {% for cell in week.days %}
-                            <div class="hcell l{{ cell.level }}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}% tamamlanıb{% else %}data yoxdur{% endif %}"></div>
+                            <div class="hcell l{{ cell.level }} {% if cell.current_month %}current-month{% endif %}" title="{{ cell.date }} — {% if cell.percent is not None %}{{ cell.percent }}% tamamlanıb{% else %}data yoxdur{% endif %}"></div>
                         {% endfor %}
                     </div>
                 {% endfor %}

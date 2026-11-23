@@ -756,11 +756,15 @@
                             }
 
                             // Update item streak if element exists
-                            var itemLi = btn.closest('li') || btn.closest('.focus-item');
+                            var itemLi = btn.closest('li') || btn.closest('.focus-item') || btn.closest('.weekly-goal-item');
                             if (itemLi) {
                                 var streakEl = itemLi.querySelector('.streak');
                                 if (streakEl && data.streak !== undefined) {
-                                    streakEl.textContent = data.streak;
+                                    if (itemLi.classList.contains('weekly-goal-item')) {
+                                        streakEl.textContent = data.streak + ' həftə';
+                                    } else {
+                                        streakEl.textContent = data.streak;
+                                    }
                                 }
                                 var fracEl = itemLi.querySelector('.frac');
                                 if (fracEl) {

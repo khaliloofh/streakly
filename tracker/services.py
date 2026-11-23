@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.db.models import Count, Q
 from django.conf import settings as django_settings
 
-from .models import Task, TaskLog
+from .models import Task, TaskLog, WeeklyGoal, WeeklyGoalLog, get_week_start
 
 # Curated motivational & habit quotes
 QUOTES = [
@@ -308,7 +308,12 @@ def build_optimized_heatmap(weeks=53, today=None):
                     level = 3
                 else:
                     level = 4
-            days.append({'date': day, 'percent': percent, 'level': level})
+            days.append({
+                'date': day,
+                'percent': percent,
+                'level': level,
+                'current_month': (day.year == today.year and day.month == today.month),
+            })
             day += timedelta(days=1)
 
         month_name = days[0]['date'].strftime('%b').lower()
@@ -317,6 +322,64 @@ def build_optimized_heatmap(weeks=53, today=None):
         week_list.append({'days': days, 'label': label})
 
     return week_list
+
+def build_current_month_heatmap(year=None, month=None, today=None):
+    """Seçilmiş ayın (default: cari ay) tam heatmap-i, naviqasiya üçün year/month qəbul edir."""
+    today = today or timezone.localdate()
+    year = year or today.year
+    month = month or today.month
+    first_day = date(year, month, 1)
+    if month == 12:
+        next_month_first = date(year + 1, 1, 1)
+    else:
+        next_month_first = date(year, month + 1, 1)
+    last_day = next_month_first - timedelta(days=1)
+
+    start = first_day - timedelta(days=first_day.weekday())
+    end = last_day + timedelta(days=(6 - last_day.weekday()))
+
+    creation_dates = list(Task.objects.values_list('created_at__date', flat=True))
+    creation_dates.sort()
+
+    done_counts = dict(
+        TaskLog.objects.filter(date__gte=start, date__lte=end, done=True)
+        .values('date')
+        .annotate(cnt=Count('id'))
+        .values_list('date', 'cnt')
+    )
+
+    import bisect
+
+    def count_tasks_created_by(day):
+        return bisect.bisect_right(creation_dates, day)
+
+    week_list = []
+    day = start
+    while day <= end:
+        days = []
+        for _ in range(7):
+            total = count_tasks_created_by(day)
+            if total == 0:
+                percent = None
+                level = 0
+            else:
+                done = done_counts.get(day, 0)
+                percent = round((done / total) * 100)
+                if percent <= 0:
+                    level = 0
+                elif percent <= 25:
+                    level = 1
+                elif percent <= 50:
+                    level = 2
+                elif percent <= 75:
+                    level = 3
+                else:
+                    level = 4
+            days.append({'date': day, 'percent': percent, 'level': level, 'in_month': day.month == month})
+            day += timedelta(days=1)
+        week_list.append({'days': days})
+
+    return week_list, first_day
 
 
 def current_week_summary(today=None):
@@ -530,3 +593,54 @@ def import_data_from_dict(data):
             created_logs_count += len(logs_to_create)
 
     return created_tasks_count, created_logs_count
+
+
+def get_weekly_goal_data(today=None):
+    """Aktiv WeeklyGoal-ları gətirir, cari həftənin log-unu tapır/yaradır,
+    və ardıcıl neçə həftədir done olduğunu (weekly_streak) hesablayır."""
+    today = today or timezone.localdate()
+    week_start = get_week_start(today)
+
+    goals = list(WeeklyGoal.objects.filter(is_active=True).order_by('-created_at'))
+    if not goals:
+        return []
+
+    goal_ids = [g.id for g in goals]
+
+    # Cari həftənin log-larını tap/yarat
+    existing_logs = {
+        log.weekly_goal_id: log
+        for log in WeeklyGoalLog.objects.filter(weekly_goal_id__in=goal_ids, week_start=week_start)
+    }
+    missing = [
+        WeeklyGoalLog(weekly_goal=g, week_start=week_start, done=False)
+        for g in goals if g.id not in existing_logs
+    ]
+    if missing:
+        WeeklyGoalLog.objects.bulk_create(missing, ignore_conflicts=True)
+        for log in WeeklyGoalLog.objects.filter(weekly_goal_id__in=goal_ids, week_start=week_start):
+            existing_logs[log.weekly_goal_id] = log
+
+    # Bütün done həftələri bir dəfəyə çək, streak-i yaddaşda hesabla
+    done_weeks_by_goal = defaultdict(set)
+    for gid, w in WeeklyGoalLog.objects.filter(weekly_goal_id__in=goal_ids, done=True).values_list('weekly_goal_id', 'week_start'):
+        done_weeks_by_goal[gid].add(w)
+
+    goal_data = []
+    for g in goals:
+        done_weeks = done_weeks_by_goal[g.id]
+        streak = 0
+        w = week_start
+        if w not in done_weeks:
+            w -= timedelta(days=7)
+        while w in done_weeks:
+            streak += 1
+            w -= timedelta(days=7)
+
+        goal_data.append({
+            'goal': g,
+            'log': existing_logs.get(g.id),
+            'streak': streak,
+        })
+
+    return goal_data

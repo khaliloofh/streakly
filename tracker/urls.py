@@ -22,4 +22,8 @@ urlpatterns = [
     path('backup/import/', views.import_backup, name='import_backup'),
     path('wallpaper/upload/', views.upload_wallpaper, name='upload_wallpaper'),
     path('wallpaper/reset/', views.reset_wallpaper, name='reset_wallpaper'),
+    path('weekly-goal/add/', views.add_weekly_goal, name='add_weekly_goal'),
+    path('weekly-goal/toggle/<int:log_id>/', views.toggle_weekly_goal, name='toggle_weekly_goal'),
+    path('weekly-goal/delete/<int:goal_id>/', views.delete_weekly_goal, name='delete_weekly_goal'),
+    path('weekly-goal/edit/<int:goal_id>/', views.edit_weekly_goal, name='edit_weekly_goal'),
 ]

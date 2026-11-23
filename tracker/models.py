@@ -1,5 +1,13 @@
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
+
+
+def get_week_start(today=None):
+    """Cari həftənin Bazar ertəsi tarixini qaytarır."""
+    today = today or timezone.localdate()
+    return today - timedelta(days=today.weekday())
 
 
 class Task(models.Model):
@@ -73,3 +81,40 @@ class TaskLog(models.Model):
 
     def __str__(self):
         return f"{self.task.title} - {self.date} - {'done' if self.done else 'not done'}"
+
+
+class WeeklyGoal(models.Model):
+    title = models.CharField(max_length=200)
+    note = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    def current_week_log(self, week_start=None):
+        week_start = week_start or get_week_start()
+        return self.logs.filter(week_start=week_start).first()
+
+    def weekly_streak(self):
+        """Ardıcıl neçə həftədir done olub (bu həftə üçün grace period var)."""
+        streak = 0
+        week = get_week_start()
+        if not self.logs.filter(week_start=week, done=True).exists():
+            week -= timedelta(days=7)
+        while self.logs.filter(week_start=week, done=True).exists():
+            streak += 1
+            week -= timedelta(days=7)
+        return streak
+
+
+class WeeklyGoalLog(models.Model):
+    weekly_goal = models.ForeignKey(WeeklyGoal, on_delete=models.CASCADE, related_name='logs')
+    week_start = models.DateField()  # həmişə Bazar ertəsi
+    done = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('weekly_goal', 'week_start')
+
+    def __str__(self):
+        return f"{self.weekly_goal.title} - {self.week_start} - {'done' if self.done else 'not done'}"

@@ -7,8 +7,8 @@ from django.conf import settings as django_settings
 from django.http import JsonResponse
 from django.db.models import Count
 
-from .models import Task, TaskLog
-from .forms import TaskForm
+from .models import Task, TaskLog, WeeklyGoal, WeeklyGoalLog
+from .forms import TaskForm, WeeklyGoalForm
 from . import services
 
 
@@ -42,6 +42,7 @@ def home(request):
 
     milestone_info = services.get_milestone_info(current_streak)
     heatmap = services.build_optimized_heatmap(weeks=53, today=today)
+
     week_summary = services.current_week_summary(today=today)
     week_done_sum = sum(d['done'] for d in week_summary)
     week_total_sum = sum(d['total'] for d in week_summary)
@@ -49,6 +50,11 @@ def home(request):
     focus_data = [item for item in task_data if item['task'].is_focus]
     quote_data = services.get_quote_for_day(today=today)
     insights = services.get_productivity_insights(today=today)
+
+    weekly_goal_form = WeeklyGoalForm()
+    weekly_goal_data = services.get_weekly_goal_data(today=today)
+    weekly_goals_done = sum(1 for item in weekly_goal_data if item['log'] and item['log'].done)
+    weekly_goals_total = len(weekly_goal_data)
 
     context = {
         'task_data': task_data,
@@ -70,6 +76,10 @@ def home(request):
         'heatmap': heatmap,
         'quote': quote_data,
         'insights': insights,
+        'weekly_goal_form': weekly_goal_form,
+        'weekly_goal_data': weekly_goal_data,
+        'weekly_goals_done': weekly_goals_done,
+        'weekly_goals_total': weekly_goals_total,
         'active_page': 'dashboard',
     }
     return render(request, 'tracker/home.html', context)
@@ -352,3 +362,44 @@ def next_quote(request):
     idx = random.randint(0, len(services.QUOTES) - 1)
     q = services.QUOTES[idx]
     return JsonResponse(q)
+
+
+def add_weekly_goal(request):
+    if request.method == 'POST':
+        form = WeeklyGoalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Həftəlik hədəf əlavə olundu!')
+    return _safe_redirect(request, 'home')
+
+
+def toggle_weekly_goal(request, log_id):
+    log = get_object_or_404(WeeklyGoalLog, id=log_id)
+    log.done = not log.done
+    log.save(update_fields=['done'])
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('format') == 'json':
+        return JsonResponse({
+            'success': True,
+            'done': log.done,
+            'goal_id': log.weekly_goal_id,
+            'streak': log.weekly_goal.weekly_streak(),
+        })
+
+    return _safe_redirect(request, 'home')
+
+
+def delete_weekly_goal(request, goal_id):
+    goal = get_object_or_404(WeeklyGoal, id=goal_id)
+    goal.delete()
+    messages.success(request, 'Həftəlik hədəf silindi.')
+    return _safe_redirect(request, 'home')
+
+def edit_weekly_goal(request, goal_id):
+    goal = get_object_or_404(WeeklyGoal, id=goal_id)
+    if request.method == 'POST':
+        goal.title = request.POST.get('title', '').strip() or goal.title
+        goal.note = request.POST.get('note', '').strip()
+        goal.save(update_fields=['title', 'note'])
+        messages.success(request, 'Həftəlik hədəf yeniləndi!')
+    return _safe_redirect(request, 'home')

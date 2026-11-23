@@ -4,7 +4,7 @@ from django.test import TestCase, Client
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import Task, TaskLog
+from .models import Task, TaskLog, WeeklyGoal, WeeklyGoalLog, get_week_start
 from . import services
 
 
@@ -301,3 +301,55 @@ class ViewTests(TestCase):
 
         reset_res = self.client.post(reverse('reset_wallpaper'))
         self.assertEqual(reset_res.status_code, 302)
+
+    def test_weekly_goal_crud_and_toggle(self):
+        # Create weekly goal
+        add_res = self.client.post(reverse('add_weekly_goal'), {
+            'title': 'Read 1 book',
+            'note': 'At least 50 pages',
+        })
+        self.assertEqual(add_res.status_code, 302)
+        goal = WeeklyGoal.objects.get(title='Read 1 book')
+        self.assertEqual(goal.note, 'At least 50 pages')
+        self.assertEqual(str(goal), 'Read 1 book')
+
+        # Load dashboard which initializes the current week's log
+        home_res = self.client.get(reverse('home'))
+        self.assertEqual(home_res.status_code, 200)
+        self.assertContains(home_res, 'Read 1 book')
+
+        log = goal.current_week_log()
+        self.assertIsNotNone(log)
+        self.assertFalse(log.done)
+        self.assertEqual(goal.weekly_streak(), 0)
+
+        # Toggle done via AJAX
+        ajax_res = self.client.get(
+            reverse('toggle_weekly_goal', args=[log.id]),
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(ajax_res.status_code, 200)
+        data = ajax_res.json()
+        self.assertTrue(data['success'])
+        self.assertTrue(data['done'])
+        self.assertEqual(data['streak'], 1)
+
+        log.refresh_from_db()
+        self.assertTrue(log.done)
+        self.assertEqual(goal.weekly_streak(), 1)
+        self.assertIn("done", str(log))
+
+        # Edit weekly goal
+        edit_res = self.client.post(reverse('edit_weekly_goal', args=[goal.id]), {
+            'title': 'Read 2 books',
+            'note': 'Fiction and non-fiction',
+        })
+        self.assertEqual(edit_res.status_code, 302)
+        goal.refresh_from_db()
+        self.assertEqual(goal.title, 'Read 2 books')
+        self.assertEqual(goal.note, 'Fiction and non-fiction')
+
+        # Delete weekly goal
+        del_res = self.client.get(reverse('delete_weekly_goal', args=[goal.id]))
+        self.assertEqual(del_res.status_code, 302)
+        self.assertFalse(WeeklyGoal.objects.filter(id=goal.id).exists())
